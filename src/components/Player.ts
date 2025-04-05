@@ -58,7 +58,6 @@ export default class Player {
     let horizontalInput = 0;
     let verticalInput = 0;
 
-    // Keyboard input
     if (keyQ?.isDown) {
       horizontalInput = -1;
       targetRotation = Phaser.Math.DegToRad(-C.MAX_ROTATION_ANGLE);
@@ -76,18 +75,14 @@ export default class Player {
       verticalInput = 1;
     }
 
-    // Gamepad input
     const gamepads = this.scene.input.gamepad?.getAll();
     if (gamepads?.length) {
-      const gamepad = this.scene.input.gamepad?.getPad(gamepads[0].index); // Assuming gamepad 1, adjust as needed
+      const gamepad = this.scene.input.gamepad?.getPad(gamepads[0].index);
       if (gamepad) {
-        // Horizontal input using left stick
         horizontalInput = gamepad.axes[0]?.getValue() || horizontalInput;
 
-        // Vertical input using left stick
         verticalInput = gamepad.axes[1]?.getValue() || verticalInput;
 
-        // Rotation based on horizontal gamepad input
         if (horizontalInput < 0) {
           targetRotation = Phaser.Math.DegToRad(-C.MAX_ROTATION_ANGLE);
         } else if (horizontalInput > 0) {
@@ -108,6 +103,10 @@ export default class Player {
 
   getPosition(): Phaser.Math.Vector2 {
     return new Phaser.Math.Vector2(this.sprite.x, this.sprite.y);
+  }
+  
+  getSprite(): Phaser.Physics.Arcade.Sprite {
+    return this.sprite
   }
 
   handleCollision(): void {

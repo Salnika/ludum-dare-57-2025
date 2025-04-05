@@ -7,10 +7,10 @@ export default class Sonar {
   private graphics!: Phaser.GameObjects.Graphics;
   private sound!: Phaser.Sound.BaseSound;
   private outlinePipelineInstance!: OutlinePipeline | null;
-
   private active: boolean = false;
   private radius: number = 0;
   private currentPosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
+  private maxSonarRadius: number = C.MAX_SONAR_RADIUS;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -20,7 +20,9 @@ export default class Sonar {
     this.scene.load.audio(C.ASSETS.SONAR_PING_SOUND, "assets/sonar.mp3");
   }
 
-  create(outlinePipeline?: OutlinePipeline): void {
+  create(
+    outlinePipeline?: OutlinePipeline,
+  ): void {
     this.outlinePipelineInstance = outlinePipeline || null;
     this.graphics = this.scene.add
       .graphics()
@@ -33,10 +35,7 @@ export default class Sonar {
     });
   }
 
-  activate(
-    position: Phaser.Math.Vector2,
-    onCompleteCallback: () => void
-  ): void {
+  activate(position: Phaser.Math.Vector2): void {
     if (this.active) return;
     this.active = true;
     this.radius = 1;
@@ -87,13 +86,12 @@ export default class Sonar {
       this.outlinePipelineInstance.setSonarProperties(0, 0, 0, false);
     }
   }
-
   update(dt: number): void {
     if (!this.active) return;
 
-    this.currentPosition.y -=  C.BACKGROUND_SCROLL_SPEED * (dt / 16.66);
+    this.currentPosition.y -= C.BACKGROUND_SCROLL_SPEED * (dt / 16.66);
     this.radius += C.SONAR_SPEED * dt;
-    const sonarProgress = this.radius / C.MAX_SONAR_RADIUS;
+    const sonarProgress = this.radius / this.maxSonarRadius;
     const sonarAlpha = Math.max(0, 1 - sonarProgress * 0.8);
 
     this.graphics.clear();
@@ -137,12 +135,20 @@ export default class Sonar {
       );
     }
 
-    if (this.radius >= C.MAX_SONAR_RADIUS) {
+    if (this.radius >= this.maxSonarRadius) {
       this.deactivate();
     }
   }
 
   isActive(): boolean {
     return this.active;
+  }
+
+  getCurrentRadius(): number {
+    return this.radius;
+  }
+
+  getCurrentPosition(): Phaser.Math.Vector2 {
+    return this.currentPosition;
   }
 }

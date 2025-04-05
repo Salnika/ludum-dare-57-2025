@@ -22,7 +22,7 @@ export default class Torpedo {
 
   getTorpedo(): SingleTorpedo | null {
     const inactiveTorpedo = this.torpedoPool.find(
-      (torpedo) => !torpedo.isActive() && !torpedo.hasActiveLight() // Vérification de la lumière
+      (torpedo) => !torpedo.isActive() && !torpedo.hasActiveLight()
     );
     return inactiveTorpedo || null;
   }

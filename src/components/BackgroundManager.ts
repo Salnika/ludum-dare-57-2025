@@ -7,6 +7,7 @@ export default class BackgroundManager {
   private background!: Phaser.GameObjects.TileSprite;
   private backgroundCopy!: Phaser.GameObjects.TileSprite | null;
   private outlinePipelineInstance!: OutlinePipeline | null;
+  private sonarTimer: Phaser.Time.TimerEvent | null = null;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -88,6 +89,14 @@ export default class BackgroundManager {
       this.outlinePipelineInstance
     ) {
       this.background.setPipeline(this.outlinePipelineInstance);
+    }
+
+    if (!this.sonarTimer) {
+      this.sonarTimer = this.scene.time.addEvent({
+        delay: C.JELLYFISH_SONAR_DURATION,
+        callback: () => this.removeSonarEffect(),
+        callbackScope: this,
+      });
     }
   }
 
