@@ -80,8 +80,8 @@ export default class OutlinePipeline extends Phaser.Renderer.WebGL.Pipelines
     this._outlineColor = new Phaser.Display.Color(0, 255, 0, 255);
     this._thickness = 2.0;
     this._threshold = 0.1;
-    this._textureWidth = 512;
-    this._textureHeight = 512;
+    this._textureWidth = 1080;
+    this._textureHeight = 1350;
 
     this._sonarActive = false;
     this._sonarCenter = new Phaser.Math.Vector2(0, 0);

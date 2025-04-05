@@ -20,7 +20,8 @@ export default class BubbleEmitter {
 
     const size = 16;
     const radius = size * 0.3;
-    const graphics = this.scene.make.graphics({ x: 0, y: 0, add: false });
+
+    const graphics = this.scene.make.graphics({ x: 0, y: 0 });
 
     graphics.fillStyle(0xffffff, 0.3);
     graphics.fillCircle(size / 2, size / 2, radius);

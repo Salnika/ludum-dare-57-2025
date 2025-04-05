@@ -88,10 +88,10 @@ export default class Sonar {
     }
   }
 
-  update(dt: number, currentPosition: Phaser.Math.Vector2): void {
+  update(dt: number): void {
     if (!this.active) return;
 
-    this.currentPosition.copy(currentPosition);
+    this.currentPosition.y -=  C.BACKGROUND_SCROLL_SPEED * (dt / 16.66);
     this.radius += C.SONAR_SPEED * dt;
     const sonarProgress = this.radius / C.MAX_SONAR_RADIUS;
     const sonarAlpha = Math.max(0, 1 - sonarProgress * 0.8);

@@ -10,16 +10,17 @@ export default class Player {
   }
 
   create(x: number, y: number): void {
-    this.scene.anims.create({
-      key: C.ANIMATIONS.SUB_IDLE,
-      frames: this.scene.anims.generateFrameNumbers(
-        C.ASSETS.SUBMARINE_SPRITESHEET,
-        { start: 0, end: 2 }
-      ),
-      frameRate: 8,
-      repeat: -1,
-    });
-
+    if (!this.scene.anims.exists(C.ANIMATIONS.SUB_IDLE)) {
+      this.scene.anims.create({
+        key: C.ANIMATIONS.SUB_IDLE,
+        frames: this.scene.anims.generateFrameNumbers(
+          C.ASSETS.SUBMARINE_SPRITESHEET,
+          { start: 0, end: 2 }
+        ),
+        frameRate: 8,
+        repeat: -1,
+      });
+    }
     this.sprite = this.scene.physics.add
       .sprite(x, y, C.ASSETS.SUBMARINE_SPRITESHEET)
       .setDepth(C.DEPTH_PLAYER)
@@ -36,26 +37,67 @@ export default class Player {
   updateMovement(cursors: Phaser.Types.Input.Keyboard.CursorKeys): void {
     if (!this.sprite?.active) return;
 
+    const keyQ = this.scene.input.keyboard?.addKey(
+      Phaser.Input.Keyboard.KeyCodes.A
+    );
+    const keyD = this.scene.input.keyboard?.addKey(
+      Phaser.Input.Keyboard.KeyCodes.D
+    );
+    const keyZ = this.scene.input.keyboard?.addKey(
+      Phaser.Input.Keyboard.KeyCodes.W
+    );
+    const keyS = this.scene.input.keyboard?.addKey(
+      Phaser.Input.Keyboard.KeyCodes.S
+    );
+
     this.sprite.setVelocity(0);
     let targetRotation = 0;
 
-    if (cursors.left?.isDown) {
-      this.sprite.setVelocityX(-C.PLAYER_SPEED);
+    const verticalMargin = 50;
+
+    let horizontalInput = 0;
+    let verticalInput = 0;
+
+    // Keyboard input
+    if (keyQ?.isDown) {
+      horizontalInput = -1;
       targetRotation = Phaser.Math.DegToRad(-C.MAX_ROTATION_ANGLE);
-    } else if (cursors.right?.isDown) {
-      this.sprite.setVelocityX(C.PLAYER_SPEED);
+    } else if (keyD?.isDown) {
+      horizontalInput = 1;
       targetRotation = Phaser.Math.DegToRad(C.MAX_ROTATION_ANGLE);
     }
 
-    const verticalMargin = 50;
-    if (cursors.up?.isDown && this.sprite.y > verticalMargin) {
-      this.sprite.setVelocityY(-C.PLAYER_SPEED);
+    if (keyZ?.isDown && this.sprite.y > verticalMargin) {
+      verticalInput = -1;
     } else if (
-      cursors.down?.isDown &&
+      keyS?.isDown &&
       this.sprite.y < this.scene.scale.height - verticalMargin
     ) {
-      this.sprite.setVelocityY(C.PLAYER_SPEED);
+      verticalInput = 1;
     }
+
+    // Gamepad input
+    const gamepads = this.scene.input.gamepad?.getAll();
+    if (gamepads?.length) {
+      const gamepad = this.scene.input.gamepad?.getPad(gamepads[0].index); // Assuming gamepad 1, adjust as needed
+      if (gamepad) {
+        // Horizontal input using left stick
+        horizontalInput = gamepad.axes[0]?.getValue() || horizontalInput;
+
+        // Vertical input using left stick
+        verticalInput = gamepad.axes[1]?.getValue() || verticalInput;
+
+        // Rotation based on horizontal gamepad input
+        if (horizontalInput < 0) {
+          targetRotation = Phaser.Math.DegToRad(-C.MAX_ROTATION_ANGLE);
+        } else if (horizontalInput > 0) {
+          targetRotation = Phaser.Math.DegToRad(C.MAX_ROTATION_ANGLE);
+        }
+      }
+    }
+
+    this.sprite.setVelocityX(horizontalInput * C.PLAYER_SPEED);
+    this.sprite.setVelocityY(verticalInput * C.PLAYER_SPEED);
 
     this.sprite.rotation = Phaser.Math.Linear(
       this.sprite.rotation,

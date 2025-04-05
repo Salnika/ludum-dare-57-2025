@@ -145,7 +145,10 @@ export default class BackgroundManager {
     }
   }
 
-  getTilePositionY(): number {
-    return this.background?.tilePositionY ?? 0;
+  getScrollX(): number {
+    return 0;
+  }
+  getScrollY(): number {
+    return this.background.tilePositionY;
   }
 }

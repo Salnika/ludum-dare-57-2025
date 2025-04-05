@@ -12,6 +12,9 @@ const config: Phaser.Types.Core.GameConfig = {
     default: "arcade",
     arcade: { debug: false },
   },
+  input: {
+    gamepad: true
+},
   scene: GameScene,
 };
 
