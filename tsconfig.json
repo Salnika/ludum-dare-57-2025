@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // Supporte les champs privés (#)
+    "module": "ESNext", // Compatible avec les dernières fonctionnalités
+    "moduleResolution": "node",
+    "lib": ["DOM", "ES2022"], // Inclut les définitions pour ES2022
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "allowJs": false,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    // Optionnel : pour plus de clarté ou compatibilité future
+    "useDefineForClassFields": true // Assure un comportement moderne pour les champs de classe
+  },
+  "include": ["src"]
+}
