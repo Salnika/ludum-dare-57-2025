@@ -15,11 +15,11 @@ import JellyfishSpawnManager from "./JellyfishSpawnManager";
 import PipelineManager from "./PipelineManager";
 import Torpedo from "../components/Torpedo";
 import InputManager from "./InputManager";
-import * as C from '../config/constants'
+import * as C from "../config/constants";
 
 export default class GameScene extends Phaser.Scene {
   private player!: Player;
-  private sonar!: Sonar;
+  public sonar!: Sonar;
   private backgroundManager!: BackgroundManager;
   private uiManager!: UIManager;
   private bubbleEmitter!: BubbleEmitter;
@@ -33,12 +33,15 @@ export default class GameScene extends Phaser.Scene {
   private jellyfishSpawnManager!: JellyfishSpawnManager;
   private pipelineManager!: PipelineManager;
   public isPaused: boolean = false;
+  public postSceneLaunched: boolean = false;
+  public pauseSceneLaunched: boolean = false;
 
   constructor() {
     super({ key: "GameScene" });
   }
 
   create() {
+    console.log("CREATED");
     this.uiManager = new UIManager(this);
     this.gameStateManager = new GameStateManager(this, this.uiManager);
 
@@ -126,13 +129,21 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
+    if (this.gameStateManager.isGameOverState() && !this.postSceneLaunched) {
+      this.postSceneLaunched = true;
+      this.scene.start("PostScene", { points: this.gameStateManager.getDepth().toFixed(0) });
+      return;
+    }
+
     if (this.isPaused || this.gameStateManager.isGameOverState()) return;
 
     const dt = delta / 1000;
-    const meters = C.BACKGROUND_SCROLL_SPEED * (delta / 16.66);
     const { targetX, targetY } = this.inputManager.getTargetCoordinates();
 
     this.gameStateManager.updateDepth(delta);
+    if (this.sonar.energy < 100) {
+      this.sonar.energy += 0.25 * dt;
+    }
     this.player.updateMovement(this.inputManager.getCursors());
     this.lightingManager.updateLighting(
       targetX,
@@ -154,15 +165,35 @@ export default class GameScene extends Phaser.Scene {
   }
 
   setGameOver(value: boolean) {
-    this.gameStateManager.setGameOver;
+    this.gameStateManager.setGameOver(value);
+  }
+
+  restart() {
+    window.location.reload();
   }
 
   togglePause() {
-    this.isPaused = !this.isPaused
     if (this.isPaused) {
-      this.jellyfishSpawnManager.pauseSpawnTimer()
-    }else {
-      this.jellyfishSpawnManager.setupSpawnTimer()
+      this.resumeGame();
+      return;
     }
+    this.pauseGame();
+  }
+
+  private pauseGame() {
+    if (this.pauseSceneLaunched) return;
+    this.pauseSceneLaunched = true;
+    this.isPaused = true;
+    this.jellyfishSpawnManager.pauseSpawnTimer();
+    this.scene.launch("PauseScene");
+    this.scene.pause();
+  }
+
+  private resumeGame() {
+    this.isPaused = false;
+    this.pauseSceneLaunched = false;
+    this.jellyfishSpawnManager.setupSpawnTimer();
+    this.scene.resume();
+    this.scene.stop("PauseScene");
   }
 }

@@ -6,13 +6,14 @@ import GameScene from "../scenes/GameScene";
 export default class Sonar {
   private scene: GameScene;
   private graphics!: Phaser.GameObjects.Graphics;
-  private sound!: Phaser.Sound.BaseSound;
+  public sound!: Phaser.Sound.BaseSound;
   private outlinePipelineInstance!: OutlinePipeline | null;
   private active: boolean = false;
   private radius: number = 0;
   private currentPosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
   private maxSonarRadius: number = C.MAX_SONAR_RADIUS;
-
+  public energy: number = 100;
+  public sonarBonus: number = 0;
   constructor(scene: GameScene) {
     this.scene = scene;
   }
@@ -33,11 +34,11 @@ export default class Sonar {
   }
 
   activate(position: Phaser.Math.Vector2): void {
-    if (this.active) return;
+    if (this.active || !this.energy) return;
     this.active = true;
     this.radius = 1;
     this.currentPosition.copy(position);
-
+    this.energy -= 5;
     this.graphics
       .setVisible(true)
       .setAlpha(1)
@@ -88,7 +89,7 @@ export default class Sonar {
 
     this.currentPosition.y -= C.BACKGROUND_SCROLL_SPEED * (dt / 16.66);
     this.radius += C.SONAR_SPEED * dt;
-    const sonarProgress = this.radius / this.maxSonarRadius;
+    const sonarProgress = this.radius / this.maxSonarRadius + this.sonarBonus;
     const sonarAlpha = Math.max(0, 1 - sonarProgress * 0.8);
 
     this.graphics.clear();
@@ -132,7 +133,7 @@ export default class Sonar {
       );
     }
 
-    if (this.radius >= this.maxSonarRadius) {
+    if (this.radius >= this.maxSonarRadius + this.sonarBonus) {
       this.deactivate();
     }
   }

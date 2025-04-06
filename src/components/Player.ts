@@ -5,7 +5,7 @@ import GameScene from "../scenes/GameScene";
 export default class Player {
   private scene: GameScene;
   public sprite!: Phaser.Physics.Arcade.Sprite;
-  public hullLife: number = 2;
+  public hullLife: number = 1 ;
   public isInvincible: boolean = false;
   private originalPosition!: { x: number; y: number };
   constructor(scene: GameScene) {

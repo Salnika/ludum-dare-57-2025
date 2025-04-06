@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import * as C from "../config/constants";
+import GameScene from "./GameScene";
 
 export default class LoadingScene extends Phaser.Scene {
   private gamepad: Phaser.Input.Gamepad.Gamepad | undefined;
@@ -135,6 +136,12 @@ export default class LoadingScene extends Phaser.Scene {
     if (this.gamepad) {
       this.gamepad.removeAllListeners();
     }
+
+    const gameScene = this.scene.get("GameScene") as GameScene;
+    if (gameScene) {
+      gameScene.postSceneLaunched = false;
+    }
+
     this.scene.start("GameScene");
   }
 

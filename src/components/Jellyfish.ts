@@ -200,7 +200,7 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
 
   public die(): void {
     if (this.isDying) return;
-
+    
     this.isDying = true;
     if (this.body) this.body.enable = false;
 

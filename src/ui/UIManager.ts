@@ -9,13 +9,14 @@ export default class UIManager {
   private torpedoInfoTexts: Map<TorpedoType, Phaser.GameObjects.Text> =
     new Map();
   private torpedoDisplayGroup!: Phaser.GameObjects.Group;
+  private energyBar!: Phaser.GameObjects.Graphics;
+  private energyPercentageText!: Phaser.GameObjects.Text;
 
   constructor(scene: GameScene) {
     this.scene = scene;
   }
 
   create(): void {
-    console.log('ICI')
     this.depthText = this.scene.add
       .text(this.scene.scale.width - 20, 20, "Profondeur: 0 m", {
         fontSize: "16px",
@@ -37,6 +38,16 @@ export default class UIManager {
       graphics.generateTexture("redPixel", 1, 1);
       graphics.destroy();
     }
+
+    this.energyBar = this.scene.add.graphics();
+    this.energyPercentageText = this.scene.add
+      .text(0, 0, "100%", {
+        fontSize: "32px",
+        color: "#000000",
+        align: "center",
+      })
+      .setOrigin(0.5);
+    this.updateEnergyBar();
   }
 
   createTorpedoDisplay(
@@ -102,5 +113,28 @@ export default class UIManager {
     if (this.depthText?.active) {
       this.depthText.setText(`Profondeur: ${Math.floor(depth)} m`);
     }
+  }
+
+  updateEnergyBar(): void {
+    const width = this.scene.scale.width / 2;
+    const height = 20;
+    const percentage = this.scene.sonar.energy / 100;
+    const barWidth = width * percentage;
+    const x = (this.scene.scale.width - width) / 2;
+    const yPos = this.scene.scale.height - height;
+
+    this.energyBar.clear();
+    this.energyBar.fillStyle(0x00ff00, 1);
+    this.energyBar.fillRect(x, yPos - 50, barWidth, height);
+    this.energyBar.lineStyle(1, 0x000000, 1);
+    this.energyBar.strokeRect(x, yPos - 50, width, height);
+    this.energyBar.setDepth(C.DEPTH_TEXT).setScrollFactor(0);
+ 
+    this.energyPercentageText.setText(
+      `${Math.round(this.scene.sonar.energy)}%`
+    );
+    this.energyPercentageText.x = x + width / 2;
+    this.energyPercentageText.y = yPos - 50 + height / 2;
+    this.energyPercentageText.setDepth(C.DEPTH_TEXT).setScrollFactor(0);
   }
 }
