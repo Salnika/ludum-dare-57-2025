@@ -17,6 +17,17 @@ import Torpedo from "../components/Torpedo";
 import InputManager from "./InputManager";
 import * as C from "../config/constants";
 
+interface SaveData {
+  points: number;
+  hull: number;
+  slots: number;
+  torpedoes: {
+    light: boolean;
+    stun: boolean;
+    blast: boolean;
+  };
+}
+
 export default class GameScene extends Phaser.Scene {
   private player!: Player;
   public sonar!: Sonar;
@@ -35,13 +46,19 @@ export default class GameScene extends Phaser.Scene {
   public isPaused: boolean = false;
   public postSceneLaunched: boolean = false;
   public pauseSceneLaunched: boolean = false;
+  private torpedoes: TorpedoType[] = [];
 
   constructor() {
     super({ key: "GameScene" });
   }
 
+  init(data: { torpedoes: TorpedoType[] }) {
+    this.torpedoes = data.torpedoes || [];
+  }
+
+  preload(): void {}
+
   create() {
-    console.log("CREATED");
     this.uiManager = new UIManager(this);
     this.gameStateManager = new GameStateManager(this, this.uiManager);
 
@@ -51,17 +68,18 @@ export default class GameScene extends Phaser.Scene {
     this.animationManager = new AnimationManager(this);
     this.animationManager.createAnimations();
 
-    this.sonar = new Sonar(this);
+    this.sonar = new Sonar(this, this.pipelineManager);
     this.player = new Player(this);
-    this.backgroundManager = new BackgroundManager(this);
+    this.backgroundManager = new BackgroundManager(this, this.pipelineManager);
+
+    this.animationManager = new AnimationManager(this);
+    this.animationManager.createAnimations();
+
+    this.player = new Player(this);
     this.torpedoManager = new TorpedoManager(this, this.backgroundManager);
     this.bubbleEmitter = new BubbleEmitter(this);
-
-    this.torpedoManager.loadTorpedos([
-      TorpedoType.LIGHT,
-      TorpedoType.EXPLOSION,
-      TorpedoType.SHOCK,
-    ]);
+    this.loadSavedData();
+    this.torpedoManager.loadTorpedos(this.torpedoes);
     this.gameStateManager.setAvailableTorpedoTypes(
       this.torpedoManager
         .getRemainingTorpedos()
@@ -77,9 +95,9 @@ export default class GameScene extends Phaser.Scene {
       console.warn("No torpedo types available after loading.");
     }
 
-    this.backgroundManager.create(this.pipelineManager.getOutlinePipeline());
+    this.backgroundManager.create();
     this.player.create(this.scale.width / 2, this.scale.height * 0.2);
-    this.sonar.create(this.pipelineManager.getOutlinePipeline());
+    this.sonar.create();
     this.uiManager.create();
     if (this.gameStateManager.getAvailableTorpedoTypes().length > 0) {
       this.uiManager.createTorpedoDisplay(
@@ -131,7 +149,9 @@ export default class GameScene extends Phaser.Scene {
   update(time: number, delta: number) {
     if (this.gameStateManager.isGameOverState() && !this.postSceneLaunched) {
       this.postSceneLaunched = true;
-      this.scene.start("PostScene", { points: this.gameStateManager.getDepth().toFixed(0) });
+      this.scene.start("PostScene", {
+        points: this.gameStateManager.getDepth().toFixed(0),
+      });
       return;
     }
 
@@ -157,6 +177,43 @@ export default class GameScene extends Phaser.Scene {
     this.collisionManager.checkPlayerPixelCollision();
     if (this.sonar.isActive()) {
       this.sonarEffectManager.applySonarEffect();
+    }
+  }
+
+  private loadSavedData(): void {
+    try {
+      const savedDataString =
+        localStorage.getItem("save") ||
+        '{"points":0,"hull":1,"slots":3,"torpedoes":{"light":true,"stun":false,"blast":false}}';
+      const savedData: SaveData = JSON.parse(savedDataString);
+
+      this.player.setHull(savedData.hull || 1);
+      if (savedData.torpedoes) {
+        const availableTorpedoTypes: TorpedoType[] = [];
+        if (savedData.torpedoes.light) {
+          availableTorpedoTypes.push(TorpedoType.LIGHT);
+        }
+        if (savedData.torpedoes.stun) {
+          availableTorpedoTypes.push(TorpedoType.SHOCK);
+        }
+        if (savedData.torpedoes.blast) {
+          availableTorpedoTypes.push(TorpedoType.EXPLOSION);
+        }
+
+        this.gameStateManager.setAvailableTorpedoTypes(availableTorpedoTypes);
+
+        if (availableTorpedoTypes.length > 0) {
+          this.gameStateManager.setSelectedTorpedoType(
+            availableTorpedoTypes[0]
+          );
+        } else {
+          this.gameStateManager.setSelectedTorpedoType(TorpedoType.LIGHT);
+          console.warn("No saved torpedos available");
+        }
+      }
+
+    } catch (error) {
+      console.error("Failed to load save data:", error);
     }
   }
 
@@ -195,5 +252,13 @@ export default class GameScene extends Phaser.Scene {
     this.jellyfishSpawnManager.setupSpawnTimer();
     this.scene.resume();
     this.scene.stop("PauseScene");
+  }
+
+  shutdown() {
+    this.pipelineManager.destroy();
+  }
+
+  destroy() {
+    this.pipelineManager.destroy();
   }
 }

@@ -57,7 +57,6 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
     if (this.sceneRef.isPaused) {
       scrollAmount = 0;
     }
-    // Si le jeu est en pause, on n’applique pas de scroll
     this.y -= scrollAmount;
     if (this.copy) {
       this.copy.x = this.x;

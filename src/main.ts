@@ -17,7 +17,7 @@ const config: Phaser.Types.Core.GameConfig = {
   input: {
     gamepad: true,
   },
-  scene: [LoadingScene, GameScene, PauseScene, PostScene],
+  scene: [LoadingScene, PrepScene, GameScene, PauseScene, PostScene],
 };
 
 new Phaser.Game(config);

@@ -171,6 +171,10 @@ export default class Player {
     body.enable = true;
   }
 
+  setHull(value: number): void {
+    this.hullLife = value
+  }
+
   disable(): void {
     this.sprite?.setActive(false);
     const body = this.sprite?.body as Phaser.Physics.Arcade.Body;

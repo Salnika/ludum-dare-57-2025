@@ -57,6 +57,7 @@ export default class PauseScene extends Phaser.Scene {
   }
 
   restartGame() {
+    window.location.reload()
     this.scene.get('GameScene').resumeGame()
     this.scene.stop("GameScene");
     this.scene.start("LoadingScene");

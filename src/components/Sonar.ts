@@ -1,27 +1,26 @@
 import Phaser from "phaser";
-import OutlinePipeline from "../shaders/outline";
 import * as C from "../config/constants";
 import GameScene from "../scenes/GameScene";
+import PipelineManager from "../scenes/PipelineManager";
 
 export default class Sonar {
   private scene: GameScene;
   private graphics!: Phaser.GameObjects.Graphics;
   public sound!: Phaser.Sound.BaseSound;
-  private outlinePipelineInstance!: OutlinePipeline | null;
   private active: boolean = false;
   private radius: number = 0;
   private currentPosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
   private maxSonarRadius: number = C.MAX_SONAR_RADIUS;
   public energy: number = 100;
   public sonarBonus: number = 0;
-  constructor(scene: GameScene) {
+  private pipelineManager: PipelineManager;
+
+  constructor(scene: GameScene, pipelineManager: PipelineManager) {
     this.scene = scene;
+    this.pipelineManager = pipelineManager;
   }
 
-  create(
-    outlinePipeline?: OutlinePipeline,
-  ): void {
-    this.outlinePipelineInstance = outlinePipeline || null;
+  create(): void {
     this.graphics = this.scene.add
       .graphics()
       .setDepth(C.DEPTH_SONAR)
@@ -52,8 +51,9 @@ export default class Sonar {
 
     this.sound.play();
 
-    if (this.outlinePipelineInstance) {
-      this.outlinePipelineInstance.setSonarProperties(
+    const outlinePipeline = this.pipelineManager.getOutlinePipeline();
+    if (outlinePipeline) {
+      outlinePipeline.setSonarProperties(
         this.currentPosition.x,
         this.currentPosition.y,
         this.radius,
@@ -79,9 +79,9 @@ export default class Sonar {
         onCompleteCallback?.();
       },
     });
-
-    if (this.outlinePipelineInstance) {
-      this.outlinePipelineInstance.setSonarProperties(0, 0, 0, false);
+    const outlinePipeline = this.pipelineManager.getOutlinePipeline();
+    if (outlinePipeline) {
+      outlinePipeline.setSonarProperties(0, 0, 0, false);
     }
   }
   update(dt: number): void {
@@ -123,9 +123,9 @@ export default class Sonar {
           thirdRadius
         );
     }
-
-    if (this.outlinePipelineInstance) {
-      this.outlinePipelineInstance.setSonarProperties(
+    const outlinePipeline = this.pipelineManager.getOutlinePipeline();
+    if (outlinePipeline) {
+      outlinePipeline.setSonarProperties(
         this.currentPosition.x,
         this.currentPosition.y,
         this.radius,

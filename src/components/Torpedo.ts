@@ -3,6 +3,7 @@ import { TorpedoType, TorpedoConfig, ITorpedoConfig } from "./TorpedoTypes";
 import * as C from "../config/constants";
 import BackgroundManager from "./BackgroundManager";
 import { v4 } from "uuid";
+import GameScene from "../scenes/GameScene";
 
 export default class SingleTorpedo {
   public id: string;

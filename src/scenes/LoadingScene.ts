@@ -142,7 +142,7 @@ export default class LoadingScene extends Phaser.Scene {
       gameScene.postSceneLaunched = false;
     }
 
-    this.scene.start("GameScene");
+    this.scene.start("PrepScene");
   }
 
   create() {}

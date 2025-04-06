@@ -1,23 +1,22 @@
 import Phaser from "phaser";
-import OutlinePipeline from "../shaders/outline";
 import * as C from "../config/constants";
 import GameScene from "../scenes/GameScene";
+import PipelineManager from "../scenes/PipelineManager";
 
 export default class BackgroundManager {
   private scene: GameScene;
   private background!: Phaser.GameObjects.TileSprite;
   private backgroundCopy!: Phaser.GameObjects.TileSprite | null;
-  private outlinePipelineInstance!: OutlinePipeline | null;
   private sonarTimer: Phaser.Time.TimerEvent | null = null;
+  private pipelineManager: PipelineManager;
 
-  constructor(scene: GameScene) {
+  constructor(scene: GameScene, pipelineManager: PipelineManager) {
     this.scene = scene;
     this.backgroundCopy = null;
+    this.pipelineManager = pipelineManager;
   }
 
-  create(outlinePipeline?: OutlinePipeline): void {
-    this.outlinePipelineInstance = outlinePipeline || null;
-
+  create(): void {
     this.background = this.scene.add
       .tileSprite(
         0,
@@ -31,28 +30,9 @@ export default class BackgroundManager {
       .setDepth(C.DEPTH_BACKGROUND)
       .setPipeline("Light2D");
 
-    if (this.background.preFX && this.outlinePipelineInstance?.thickness) {
-      this.background.preFX.setPadding(this.outlinePipelineInstance.thickness);
-    }
-
-    this.trySetOutlineTextureSize();
-  }
-
-  private trySetOutlineTextureSize() {
-    if (!this.outlinePipelineInstance) return;
-
-    const bgTexture = this.scene.textures.get(C.ASSETS.BACKGROUND_IMAGE);
-    if (
-      bgTexture &&
-      bgTexture.source.length > 0 &&
-      bgTexture.source[0]?.width > 0
-    ) {
-      this.outlinePipelineInstance.setTextureSize(
-        bgTexture.source[0].width,
-        bgTexture.source[0].height
-      );
-    } else {
-      this.scene.time.delayedCall(100, this.trySetOutlineTextureSize, [], this);
+    const outlinePipeline = this.pipelineManager.getOutlinePipeline();
+    if (this.background.preFX && outlinePipeline?.thickness) {
+      this.background.preFX.setPadding(outlinePipeline.thickness);
     }
   }
 
@@ -85,11 +65,12 @@ export default class BackgroundManager {
       this.backgroundCopy.setAlpha(1).setVisible(true);
     }
 
+    const outlinePipeline = this.pipelineManager.getOutlinePipeline();
     if (
       this.scene.game.renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer &&
-      this.outlinePipelineInstance
+      outlinePipeline
     ) {
-      this.background.setPipeline(this.outlinePipelineInstance);
+      this.background.setPipeline(outlinePipeline);
     }
 
     if (!this.sonarTimer) {
@@ -116,12 +97,13 @@ export default class BackgroundManager {
         },
       });
     }
+    const outlinePipeline = this.pipelineManager.getOutlinePipeline();
 
     if (
       this.scene.game.renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer &&
-      this.outlinePipelineInstance
+      outlinePipeline
     ) {
-      if (this.background.pipeline === this.outlinePipelineInstance) {
+      if (this.background.pipeline === outlinePipeline) {
         this.background.resetPipeline(true);
         this.background.setPipeline("Light2D");
       }

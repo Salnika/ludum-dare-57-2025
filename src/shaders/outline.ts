@@ -61,8 +61,6 @@ export default class OutlinePipeline extends Phaser.Renderer.WebGL.Pipelines
   private _outlineColor: Phaser.Display.Color;
   private _thickness: number;
   private _threshold: number;
-  private _textureWidth: number;
-  private _textureHeight: number;
 
   private _sonarActive: boolean;
   private _sonarCenter: Phaser.Math.Vector2;
@@ -80,8 +78,6 @@ export default class OutlinePipeline extends Phaser.Renderer.WebGL.Pipelines
     this._outlineColor = new Phaser.Display.Color(0, 255, 0, 255);
     this._thickness = 2.0;
     this._threshold = 0.1;
-    this._textureWidth = 1080;
-    this._textureHeight = 1350;
 
     this._sonarActive = false;
     this._sonarCenter = new Phaser.Math.Vector2(0, 0);
@@ -104,17 +100,12 @@ export default class OutlinePipeline extends Phaser.Renderer.WebGL.Pipelines
     );
     this.set1f("uThickness", this._thickness);
     this.set1f("uThreshold", this._threshold);
-    this.set2f("uTextureSize", this._textureWidth, this._textureHeight);
+    this.set2f("uTextureSize", 1080, 1350);
 
     this.set1i("uSonarActive", this._sonarActive ? 1 : 0);
     this.set2f("uSonarCenter", this._sonarCenter.x, this._sonarCenter.y);
     this.set1f("uSonarRadius", this._sonarRadius);
     this.set2f("uScreenSize", this._screenSize.x, this._screenSize.y);
-  }
-
-  public setTextureSize(width: number, height: number) {
-    this._textureWidth = width;
-    this._textureHeight = height;
   }
 
   public setOutlineColor(color: number, alpha = 1) {
