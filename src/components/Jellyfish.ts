@@ -106,17 +106,20 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
   }
 
   applySonarEffect(): void {
-    if (this.isDying || this.isGlowing || this.isStun || this.sceneRef.isPaused)
+    if (
+      this.isDying ||
+      this.isGlowing ||
+      this.isStun ||
+      this.sceneRef.isPaused ||
+      this.sceneRef.sonar.isSilent
+    )
       return;
 
     this.isAffectedBySonar = true;
     this.play("jellyfish_swim");
-    //@ts-expect-error
     if (this.sceneRef.player) {
       this.playerTarget = {
-        //@ts-expect-error
         x: this.sceneRef.player.getPosition().x,
-        //@ts-expect-error
         y: this.sceneRef.player.getPosition().y,
       };
     }
@@ -214,13 +217,18 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
       this.sonarRushTimer = null;
     }
     this.isAffectedBySonar = false;
+    if (this.copy) {
+      this.copy.x = -1000;
+      this.copy.y = -1000;
+    }
 
-    this.play("jellyfish_die", true);
-    this.copy?.play("jellyfish_die", true);
+    this.play("jellyfish_die");
+    this.destroy();
+    this.copy?.destroy();
     this.on(
       Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + "jellyfish_die",
       () => {
-        this.copy?.destroy();
+
         this.destroy();
       },
       this

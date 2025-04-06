@@ -37,7 +37,7 @@ export default class JellyfishSpawnManager {
   private trySpawnJellyfish(): void {
     if (this.scene.getIsGameOver()) return;
 
-    let spawnChance = 1;
+    let spawnChance = 0.5;
     if (this.depth > 50) {
       spawnChance += Math.floor((this.depth - 100) / 5) * 0.02;
     }

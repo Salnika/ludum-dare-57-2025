@@ -23,13 +23,13 @@ interface SaveData {
   slots: number;
   torpedoes: {
     light: boolean;
-    stun: boolean;
-    blast: boolean;
+    shock: boolean;
+    explosion: boolean;
   };
 }
 
 export default class GameScene extends Phaser.Scene {
-  private player!: Player;
+  public player!: Player;
   public sonar!: Sonar;
   private backgroundManager!: BackgroundManager;
   private uiManager!: UIManager;
@@ -42,11 +42,16 @@ export default class GameScene extends Phaser.Scene {
   private lightingManager!: LightingManager;
   private sonarEffectManager!: SonarEffectManager;
   private jellyfishSpawnManager!: JellyfishSpawnManager;
+  private backgroundSound!: Phaser.Sound.BaseSound;
   private pipelineManager!: PipelineManager;
   public isPaused: boolean = false;
   public postSceneLaunched: boolean = false;
   public pauseSceneLaunched: boolean = false;
   private torpedoes: TorpedoType[] = [];
+
+  private powerUpSelectionSceneLaunched: boolean = false;
+  private lastPowerUpDepthMilestone: number = 0;
+  private readonly POWERUP_DEPTH_INTERVAL: number = 100;
 
   constructor() {
     super({ key: "GameScene" });
@@ -54,6 +59,15 @@ export default class GameScene extends Phaser.Scene {
 
   init(data: { torpedoes: TorpedoType[] }) {
     this.torpedoes = data.torpedoes || [];
+    this.isPaused = false;
+    this.postSceneLaunched = false;
+    this.pauseSceneLaunched = false;
+    this.powerUpSelectionSceneLaunched = false;
+    this.lastPowerUpDepthMilestone = 0;
+    this.backgroundSound = this.sound.add(C.ASSETS.BACKGROUND_SOUND, {
+      volume: 0.4,
+      loop: true,
+    });
   }
 
   preload(): void {}
@@ -72,14 +86,11 @@ export default class GameScene extends Phaser.Scene {
     this.player = new Player(this);
     this.backgroundManager = new BackgroundManager(this, this.pipelineManager);
 
-    this.animationManager = new AnimationManager(this);
-    this.animationManager.createAnimations();
-
-    this.player = new Player(this);
     this.torpedoManager = new TorpedoManager(this, this.backgroundManager);
     this.bubbleEmitter = new BubbleEmitter(this);
     this.loadSavedData();
     this.torpedoManager.loadTorpedos(this.torpedoes);
+
     this.gameStateManager.setAvailableTorpedoTypes(
       this.torpedoManager
         .getRemainingTorpedos()
@@ -92,7 +103,6 @@ export default class GameScene extends Phaser.Scene {
         ]
       );
     } else {
-      console.warn("No torpedo types available after loading.");
     }
 
     this.backgroundManager.create();
@@ -105,6 +115,7 @@ export default class GameScene extends Phaser.Scene {
         this.gameStateManager.getSelectedTorpedoType()
       );
     }
+
     this.bubbleEmitter.create();
 
     this.lightingManager = new LightingManager(this, this.player);
@@ -144,21 +155,31 @@ export default class GameScene extends Phaser.Scene {
       this.gameStateManager
     );
     this.inputManager.setupInput();
+
+    this.triggerPowerUpSelection();
+    this.backgroundSound.play()
   }
 
   update(time: number, delta: number) {
     if (this.gameStateManager.isGameOverState() && !this.postSceneLaunched) {
       this.postSceneLaunched = true;
+      const finalDepth = this.gameStateManager.getDepth();
       this.scene.start("PostScene", {
-        points: this.gameStateManager.getDepth().toFixed(0),
+        points: Math.round(finalDepth),
       });
       return;
     }
 
-    if (this.isPaused || this.gameStateManager.isGameOverState()) return;
+    if (
+      this.isPaused ||
+      this.gameStateManager.isGameOverState() ||
+      this.powerUpSelectionSceneLaunched
+    ) {
+      return;
+    }
 
     const dt = delta / 1000;
-      //@ts-expect-error
+    //@ts-expect-error - Assuming getTargetCoordinates exists
     const { targetX, targetY } = this.inputManager.getTargetCoordinates();
 
     this.gameStateManager.updateDepth(delta);
@@ -179,42 +200,132 @@ export default class GameScene extends Phaser.Scene {
     if (this.sonar.isActive()) {
       this.sonarEffectManager.applySonarEffect();
     }
+
+    const currentDepth = this.gameStateManager.getDepth();
+    if (
+      !this.powerUpSelectionSceneLaunched &&
+      currentDepth >=
+        this.lastPowerUpDepthMilestone + this.POWERUP_DEPTH_INTERVAL
+    ) {
+      this.lastPowerUpDepthMilestone += this.POWERUP_DEPTH_INTERVAL;
+      this.triggerPowerUpSelection();
+    }
+  }
+
+  private triggerPowerUpSelection() {
+    if (
+      this.powerUpSelectionSceneLaunched ||
+      this.gameStateManager.isGameOverState() ||
+      this.pauseSceneLaunched
+    ) {
+      return;
+    }
+
+    this.powerUpSelectionSceneLaunched = true;
+    this.isPaused = true;
+
+    if (
+      this.jellyfishSpawnManager &&
+      typeof this.jellyfishSpawnManager.pauseSpawnTimer === "function"
+    ) {
+      this.jellyfishSpawnManager.pauseSpawnTimer();
+    } else {
+    }
+
+    this.scene.launch("PowerUpSelectionScene", {
+      callerSceneKey: this.scene.key,
+    });
+  }
+
+  resume(system: Phaser.Scenes.Systems, data?: string) {
+    if (data) {
+      this.powerUpSelectionSceneLaunched = false;
+      this.isPaused = false;
+
+      if (
+        this.jellyfishSpawnManager &&
+        typeof this.jellyfishSpawnManager.setupSpawnTimer === "function"
+      ) {
+        this.jellyfishSpawnManager.setupSpawnTimer();
+      } else {
+      }
+
+      this.applyPowerUpEffect(data);
+    } else if (this.pauseSceneLaunched) {
+      this.resumeGame();
+    } else if (
+      !this.powerUpSelectionSceneLaunched &&
+      !this.pauseSceneLaunched
+    ) {
+      this.isPaused = false;
+      if (!this.gameStateManager.isGameOverState()) {
+        this.physics.resume();
+        if (
+          this.jellyfishSpawnManager &&
+          !this.jellyfishSpawnManager.getJellyfishSpawnTimer().paused
+        ) {
+        }
+      }
+    }
+  }
+
+  private applyPowerUpEffect(powerUpKey: string) {
+    switch (powerUpKey) {
+      case "sonar_boost":
+        this.sonar.maxSonarRadius += 50;
+        break;
+      case "silent_sonar":
+        this.sonar.setSilent();
+        break;
+      case "hull_reinforce":
+        this.player.setHull(this.player.hullLife + 1);
+        break;
+      case "propulsion_boost":
+        this.player.speedBonus += 10;
+        break;
+      case "sonar_recharge":
+        this.sonar.sonarRechageBonus += 0.25;
+        break;
+      case "extra_torpedo":
+        const values = Object.values(TorpedoType);
+        const randomIndex = Math.floor(Math.random() * values.length);
+        this.torpedoManager.loadTorpedos([values[randomIndex]]);
+        break;
+      case "temp_shield":
+        this.player.triggerInvincible();
+        break;
+      default:
+        return;
+    }
   }
 
   private loadSavedData(): void {
     try {
       const savedDataString =
         localStorage.getItem("save") ||
-        '{"points":0,"hull":1,"slots":3,"torpedoes":{"light":true,"stun":false,"blast":false}}';
+        '{"points":0,"hull":1,"slots":3,"torpedoes":{"light":true,"shock":false,"explosion":false}}';
       const savedData: SaveData = JSON.parse(savedDataString);
 
-      this.player.setHull(savedData.hull || 1);
-      if (savedData.torpedoes) {
-        const availableTorpedoTypes: TorpedoType[] = [];
-        if (savedData.torpedoes.light) {
-          availableTorpedoTypes.push(TorpedoType.LIGHT);
-        }
-        if (savedData.torpedoes.stun) {
-          availableTorpedoTypes.push(TorpedoType.SHOCK);
-        }
-        if (savedData.torpedoes.blast) {
-          availableTorpedoTypes.push(TorpedoType.EXPLOSION);
-        }
-
-        this.gameStateManager.setAvailableTorpedoTypes(availableTorpedoTypes);
-
-        if (availableTorpedoTypes.length > 0) {
-          this.gameStateManager.setSelectedTorpedoType(
-            availableTorpedoTypes[0]
-          );
-        } else {
-          this.gameStateManager.setSelectedTorpedoType(TorpedoType.LIGHT);
-          console.warn("No saved torpedos available");
-        }
+      if (this.player) {
+        this.player.setHull(savedData.hull || 1);
+      } else {
       }
 
+      const unlockedTorpedoTypes: TorpedoType[] = [];
+      if (savedData.torpedoes) {
+        if (savedData.torpedoes.light) {
+          unlockedTorpedoTypes.push(TorpedoType.LIGHT);
+        }
+        if (savedData.torpedoes.shock) {
+          unlockedTorpedoTypes.push(TorpedoType.SHOCK);
+        }
+        if (savedData.torpedoes.explosion) {
+          unlockedTorpedoTypes.push(TorpedoType.EXPLOSION);
+        }
+      } else {
+      }
     } catch (error) {
-      console.error("Failed to load save data:", error);
+      if (this.player) this.player.setHull(1);
     }
   }
 
@@ -231,35 +342,52 @@ export default class GameScene extends Phaser.Scene {
   }
 
   togglePause() {
-    if (this.isPaused) {
-      this.resumeGame();
+    if (this.powerUpSelectionSceneLaunched) {
       return;
     }
-    this.pauseGame();
+
+    if (this.isPaused) {
+      this.resumeGame();
+    } else {
+      this.pauseGame();
+    }
   }
 
   private pauseGame() {
-    if (this.pauseSceneLaunched) return;
-    this.pauseSceneLaunched = true;
+    if (
+      this.isPaused ||
+      this.powerUpSelectionSceneLaunched ||
+      this.gameStateManager.isGameOverState()
+    )
+      return;
+
     this.isPaused = true;
+    this.pauseSceneLaunched = true;
+
     this.jellyfishSpawnManager.pauseSpawnTimer();
+
     this.scene.launch("PauseScene");
-    this.scene.pause();
   }
 
   private resumeGame() {
+    if (!this.isPaused || !this.pauseSceneLaunched) return;
+
     this.isPaused = false;
     this.pauseSceneLaunched = false;
-    this.jellyfishSpawnManager.setupSpawnTimer();
-    this.scene.resume();
+
     this.scene.stop("PauseScene");
+
+    this.jellyfishSpawnManager.setupSpawnTimer();
   }
 
   shutdown() {
-    this.pipelineManager.destroy();
+    if (this.pipelineManager) {
+      this.pipelineManager.destroy();
+    }
+    if (this.scene.isActive("PowerUpSelectionScene"))
+      this.scene.stop("PowerUpSelectionScene");
+    if (this.scene.isActive("PauseScene")) this.scene.stop("PauseScene");
   }
 
-  destroy() {
-    this.pipelineManager.destroy();
-  }
+  destroy() {}
 }

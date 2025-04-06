@@ -4,6 +4,7 @@ import PrepScene from "./scenes/PrepScene";
 import PostScene from "./scenes/PostScene";
 import LoadingScene from "./scenes/LoadingScene";
 import PauseScene from "./scenes/PauseScene";
+import PowerUpSelectionScene from "./scenes/PowerUpsSelectionScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.WEBGL,
@@ -17,7 +18,7 @@ const config: Phaser.Types.Core.GameConfig = {
   input: {
     gamepad: true,
   },
-  scene: [LoadingScene, PrepScene, GameScene, PauseScene, PostScene],
+  scene: [LoadingScene, PrepScene, GameScene, PauseScene, PowerUpSelectionScene, PostScene],
 };
 
 new Phaser.Game(config);

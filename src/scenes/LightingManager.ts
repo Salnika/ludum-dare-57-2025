@@ -17,8 +17,8 @@ export default class LightingManager {
     this.submarineLight.radius = 200;
     this.submarineLight.attenuation = 0.03;
 
-    this.coneLight = this.scene.add.pointlight(0, 0, 0xffc000, 300);
-    this.coneLight.radius = 300;
+    this.coneLight = this.scene.add.pointlight(0, 0, 0xffc000, 250);
+    this.coneLight.radius = 250;
     this.coneLight.attenuation = 0.03;
   }
 
@@ -62,7 +62,7 @@ export default class LightingManager {
       targetX,
       targetY
     );
-    this.coneLight.radius = Phaser.Math.Clamp(distanceToTarget * 0.8, 150, 400);
+    this.coneLight.radius = Phaser.Math.Clamp(distanceToTarget * 0.8, 150, 250);
     this.coneLight.intensity = 1.5;
   }
 }

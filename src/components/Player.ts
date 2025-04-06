@@ -8,6 +8,7 @@ export default class Player {
   public hullLife: number = 1 ;
   public isInvincible: boolean = false;
   private originalPosition!: { x: number; y: number };
+  public speedBonus: number = 0;
   constructor(scene: GameScene) {
     this.scene = scene;
   }
@@ -94,8 +95,8 @@ export default class Player {
       }
     }
 
-    this.sprite.setVelocityX(horizontalInput * C.PLAYER_SPEED);
-    this.sprite.setVelocityY(verticalInput * C.PLAYER_SPEED);
+    this.sprite.setVelocityX(horizontalInput * (C.PLAYER_SPEED + this.speedBonus));
+    this.sprite.setVelocityY(verticalInput *( C.PLAYER_SPEED + this.speedBonus));
 
     this.sprite.rotation = Phaser.Math.Linear(
       this.sprite.rotation,
@@ -110,6 +111,15 @@ export default class Player {
 
   getSprite(): Phaser.Physics.Arcade.Sprite {
     return this.sprite;
+  }
+
+  triggerInvincible():void {
+    this.isInvincible = true;
+    this.sprite?.preFX?.addGlow(0xaaaaff)
+    setTimeout(() => {
+      this.isInvincible = false;
+      this.sprite?.preFX?.clear();
+    }, 30000)
   }
 
   handleCollision(): void {

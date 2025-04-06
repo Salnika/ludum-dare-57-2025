@@ -66,11 +66,11 @@ export default class LoadingScene extends Phaser.Scene {
         key: C.ASSETS.TORPEDO_SPRITE,
         url: "assets/torpedo.png",
       },
-      /*       {
+      {
         type: "audio",
         key: C.ASSETS.BACKGROUND_SOUND,
         url: "assets/soundtrack.mp3",
-      }, */
+      },
       {
         type: "audio",
         key: C.ASSETS.SONAR_PING_SOUND,

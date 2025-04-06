@@ -6,6 +6,7 @@ import GameScene from "../scenes/GameScene";
 export default class UIManager {
   private scene: GameScene;
   private depthText!: Phaser.GameObjects.Text;
+  private hullLifeText!: Phaser.GameObjects.Text; // Nouvelle propriété
   private torpedoInfoTexts: Map<TorpedoType, Phaser.GameObjects.Text> =
     new Map();
   private torpedoDisplayGroup!: Phaser.GameObjects.Group;
@@ -18,13 +19,30 @@ export default class UIManager {
 
   create(): void {
     this.depthText = this.scene.add
-      .text(this.scene.scale.width - 20, 20, "Profondeur: 0 m", {
-        fontSize: "16px",
+      .text(this.scene.scale.width - 20, 20, "Depth: 0 m", {
+        fontSize: "34px",
         color: "#ffffff",
         align: "right",
         stroke: "#000000",
         strokeThickness: 3,
       })
+      .setOrigin(1, 0)
+      .setDepth(C.DEPTH_TEXT)
+      .setScrollFactor(0);
+
+    this.hullLifeText = this.scene.add
+      .text(
+        this.scene.scale.width - 20,
+        60,
+        `Hull: ${this.scene.player.hullLife}`,
+        {
+          fontSize: "34px",
+          color: "#ffffff",
+          align: "right",
+          stroke: "#000000",
+          strokeThickness: 3,
+        }
+      )
       .setOrigin(1, 0)
       .setDepth(C.DEPTH_TEXT)
       .setScrollFactor(0);
@@ -56,7 +74,7 @@ export default class UIManager {
   ): void {
     let yPos = 20;
     const xPos = 20;
-    const yIncrement = 20;
+    const yIncrement = 25;
 
     this.torpedoDisplayGroup.clear(true, true);
     this.torpedoInfoTexts.clear();
@@ -70,7 +88,7 @@ export default class UIManager {
 
       const text = this.scene.add
         .text(xPos, yPos, `${typeName}: ${count}`, {
-          fontSize: "14px",
+          fontSize: "20px",
           color: "#ffffff",
           stroke: "#000000",
           strokeThickness: 2,
@@ -104,7 +122,6 @@ export default class UIManager {
             ? C.COLORS.TORPEDO_SELECTED
             : C.COLORS.TORPEDO_DEFAULT
         );
-      } else {
       }
     });
   }
@@ -112,6 +129,12 @@ export default class UIManager {
   updateDepthText(depth: number): void {
     if (this.depthText?.active) {
       this.depthText.setText(`Profondeur: ${Math.floor(depth)} m`);
+    }
+  }
+
+  updateHullLife(): void {
+    if (this.hullLifeText?.active) {
+      this.hullLifeText.setText(`Coque: ${this.scene.player.hullLife}`);
     }
   }
 
@@ -129,7 +152,7 @@ export default class UIManager {
     this.energyBar.lineStyle(1, 0x000000, 1);
     this.energyBar.strokeRect(x, yPos - 50, width, height);
     this.energyBar.setDepth(C.DEPTH_TEXT).setScrollFactor(0);
- 
+
     this.energyPercentageText.setText(
       `${Math.round(this.scene.sonar.energy)}%`
     );

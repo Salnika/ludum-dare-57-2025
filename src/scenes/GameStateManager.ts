@@ -28,6 +28,7 @@ export default class GameStateManager {
     if (this.scene.isPaused) return;
     this.depth += 0.05 * (delta / 16.66);
     this.uiManager.updateDepthText(this.depth);
+    this.uiManager.updateHullLife()
     this.uiManager.updateEnergyBar()
   }
 

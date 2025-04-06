@@ -18,7 +18,6 @@ export default class Torpedo {
   }
 
   loadTorpedos(types: TorpedoType[]): void {
-    this.torpedoGroup.clear(true, true);
     for (const type of types) {
       const torpedo = new SingleTorpedo(
         this.scene,

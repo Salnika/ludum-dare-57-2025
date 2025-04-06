@@ -10,10 +10,12 @@ export default class Sonar {
   private active: boolean = false;
   private radius: number = 0;
   private currentPosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
-  private maxSonarRadius: number = C.MAX_SONAR_RADIUS;
+  public maxSonarRadius: number = C.MAX_SONAR_RADIUS;
   public energy: number = 100;
   public sonarBonus: number = 0;
+  public sonarRechageBonus: number = 0;
   private pipelineManager: PipelineManager;
+  public isSilent: boolean = false;
 
   constructor(scene: GameScene, pipelineManager: PipelineManager) {
     this.scene = scene;
@@ -32,6 +34,19 @@ export default class Sonar {
     });
   }
 
+  recharge(dt: number): void {
+    if (this.energy < 100) {
+      this.energy += (0.25 + this.sonarRechageBonus) * dt;
+    }
+  }
+
+  setSilent(): void {
+    this.isSilent = true;
+    setTimeout(() => {
+      this.isSilent = false;
+    }, 30000);
+  }
+
   activate(position: Phaser.Math.Vector2): void {
     if (this.active || !this.energy) return;
     this.active = true;
@@ -42,7 +57,7 @@ export default class Sonar {
       .setVisible(true)
       .setAlpha(1)
       .clear()
-      .lineStyle(2, 0x00ff00, 1.0)
+      .lineStyle(2, this.isSilent ? 0x0000ff : 0x00ff00, 1.0)
       .strokeCircle(
         this.currentPosition.x,
         this.currentPosition.y,
@@ -95,7 +110,7 @@ export default class Sonar {
     this.graphics.clear();
 
     this.graphics
-      .lineStyle(2, 0x00ff00, sonarAlpha)
+      .lineStyle(2, this.isSilent ? 0x0000ff : 0x00ff00, sonarAlpha)
       .strokeCircle(
         this.currentPosition.x,
         this.currentPosition.y,
@@ -105,7 +120,7 @@ export default class Sonar {
     const secondaryRadius = Math.max(0, this.radius - C.SECONDARY_SONAR_OFFSET);
     if (secondaryRadius > 0) {
       this.graphics
-        .lineStyle(1, 0x00ff00, sonarAlpha)
+        .lineStyle(1, this.isSilent ? 0x0000ff : 0x00ff00, sonarAlpha)
         .strokeCircle(
           this.currentPosition.x,
           this.currentPosition.y,
@@ -116,7 +131,7 @@ export default class Sonar {
     const thirdRadius = Math.max(0, this.radius - C.SECONDARY_SONAR_OFFSET * 2);
     if (thirdRadius > 0) {
       this.graphics
-        .lineStyle(1, 0x00ff00, sonarAlpha * 0.8)
+        .lineStyle(1, this.isSilent ? 0x0000ff : 0x00ff00, sonarAlpha * 0.8)
         .strokeCircle(
           this.currentPosition.x,
           this.currentPosition.y,
