@@ -83,12 +83,10 @@ export default class LoadingScene extends Phaser.Scene {
     this.load.on("filecomplete", (key: string) => {
       loadedAssets++;
       const progress = loadedAssets / totalAssets;
-      console.log(`File loaded: ${key}, Progress: ${progress}`);
       progressFill.width = 396 * progress;
     });
 
     this.load.on("complete", () => {
-      console.log("All assets loaded");
       loadingText.setText("Press START or SPACE to play!");
       this.setupStartInput();
     });
@@ -124,7 +122,6 @@ export default class LoadingScene extends Phaser.Scene {
       this.gamepad.on(
         Phaser.Input.Gamepad.Events.BUTTON_DOWN,
         (button: number) => {
-          console.log("ICI", button);
           if (button === 0) {
             this.startGame();
           }
@@ -136,16 +133,7 @@ export default class LoadingScene extends Phaser.Scene {
 
   private async startGame() {
     if (this.gamepad) {
-      console.log("ici");
-
-      console.log(
-        this.gamepad.listenerCount(Phaser.Input.Gamepad.Events.BUTTON_DOWN)
-      );
       this.gamepad.removeAllListeners();
-
-      console.log(
-        this.gamepad.listenerCount(Phaser.Input.Gamepad.Events.BUTTON_DOWN)
-      );
     }
     this.scene.start("GameScene");
   }

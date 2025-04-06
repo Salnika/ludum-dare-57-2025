@@ -56,16 +56,12 @@ export default class Torpedo {
     targetY: number,
     type: TorpedoType
   ): boolean {
-    console.log(type);
     const torpedo = this.getTorpedo(type);
 
     if (torpedo) {
       torpedo.fireTorpedo(startX, startY, targetX, targetY, type);
       return true;
     } else {
-      console.log(
-        `No inactive torpedoes of type ${TorpedoType[type]} available in the pool.`
-      );
       return false;
     }
   }

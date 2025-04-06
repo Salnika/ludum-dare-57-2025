@@ -40,7 +40,7 @@ export default class SingleTorpedo {
 
     this.sprite.setActive(false).setVisible(false);
     this.sprite.setDepth(C.DEPTH_TORPEDO);
-
+    this.sprite.setTint(this.config.lightColor)
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     if (body) {
       body.setAllowGravity(false);
@@ -189,9 +189,11 @@ export default class SingleTorpedo {
         this.light.intensity = 0.4;
       }
     } else if (this.type === TorpedoType.EXPLOSION) {
+      this.sprite.setScale(1);
       this.sprite.preFX?.addGlow(0xfff1b5);
       this.sprite.play("explosion");
     } else if (this.type === TorpedoType.SHOCK) {
+      this.sprite.setScale(1);
       this.sprite.preFX?.addGlow(0xfff1b5);
       this.sprite.play("shock");
     }

@@ -27,19 +27,21 @@ export const TorpedoConfig: { [key in TorpedoType]: ITorpedoConfig } = {
   },
   [TorpedoType.SHOCK]: {
     speed: 300,
-    textureKey: "torped",
+    textureKey: "torpedo",
     lightColor: 0xaaaaff,
     lightRadius: 60,
     stunDuration: 2000,
     lightIntensity: 1.5,
+    scale: 0.2  ,
   },
   [TorpedoType.EXPLOSION]: {
     speed: 350,
-    textureKey: "torped",
+    textureKey: "torpedo",
     lightColor: 0xffaaaa,
     lightRadius: 100,
     explosionEffectKey: "explosion_anim",
     lightIntensity: 1.5,
     damage: 50,
+    scale: 0.2  ,
   },
 };

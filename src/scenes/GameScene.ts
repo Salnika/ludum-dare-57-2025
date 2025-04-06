@@ -27,7 +27,8 @@ export default class GameScene extends Phaser.Scene {
   public outlinePipelineInstanceBackground!: outlinePipelineInstanceBackground;
   private jellyfishGroup!: Phaser.Physics.Arcade.Group;
   private jellyfishSpawnTimer!: Phaser.Time.TimerEvent;
-
+  private scrollAccumulator: number = 0;
+  private scrollTreshold: number = 10;
   private availableTorpedoTypes: TorpedoType[] = [];
   private selectedTorpedoIndex: number = 0;
   private selectedTorpedoType!: TorpedoType;
@@ -350,28 +351,36 @@ export default class GameScene extends Phaser.Scene {
     gameObjects: Phaser.GameObjects.GameObject[],
     deltaX: number,
     deltaY: number,
-    deltaZ: number
+    deltaZ: number,
+    gamepad?: boolean
   ): void {
     if (this.isGameOver || this.availableTorpedoTypes.length === 0) return;
 
-    if (deltaY > 0) {
-      this.selectedTorpedoIndex++;
-    } else if (deltaY < 0) {
-      this.selectedTorpedoIndex--;
+    this.scrollAccumulator = (this.scrollAccumulator || 0) + deltaY;
+    const threshold = gamepad ? 0 : 50;
+
+    if (Math.abs(this.scrollAccumulator) >= threshold) {
+      if (deltaY > 0) {
+        this.selectedTorpedoIndex++;
+      } else if (deltaY < 0) {
+        this.selectedTorpedoIndex--;
+      }
+
+      this.selectedTorpedoIndex =
+        ((this.selectedTorpedoIndex % this.availableTorpedoTypes.length) +
+          this.availableTorpedoTypes.length) %
+        this.availableTorpedoTypes.length;
+
+      this.selectedTorpedoType =
+        this.availableTorpedoTypes[this.selectedTorpedoIndex];
+
+      this.uiManager.updateTorpedoInfo(
+        this.torpedoManager.getRemainingTorpedosNumeric(),
+        this.selectedTorpedoType
+      );
+
+      this.scrollAccumulator = 0;
     }
-
-    this.selectedTorpedoIndex =
-      ((this.selectedTorpedoIndex % this.availableTorpedoTypes.length) +
-        this.availableTorpedoTypes.length) %
-      this.availableTorpedoTypes.length;
-
-    this.selectedTorpedoType =
-      this.availableTorpedoTypes[this.selectedTorpedoIndex];
-
-    this.uiManager.updateTorpedoInfo(
-      this.torpedoManager.getRemainingTorpedosNumeric(),
-      this.selectedTorpedoType
-    );
   }
 
   private setupGamepadInput() {
@@ -386,7 +395,6 @@ export default class GameScene extends Phaser.Scene {
       "connected",
       (pad: Phaser.Input.Gamepad.Gamepad) => {
         this.gamepad = pad;
-        console.log("Gamepad connecté :", pad.id);
       },
       this
     );
@@ -396,7 +404,6 @@ export default class GameScene extends Phaser.Scene {
       (pad: Phaser.Input.Gamepad.Gamepad) => {
         if (this.gamepad === pad) {
           this.gamepad = undefined;
-          console.log("Gamepad déconnecté");
         }
       },
       this
@@ -440,11 +447,11 @@ export default class GameScene extends Phaser.Scene {
         }
 
         if (button.index === 4 && button.pressed) {
-          this.handleMouseWheel(this.input.activePointer, [], 0, -1, 0);
+          this.handleMouseWheel(this.input.activePointer, [], 0, -1, 0, true);
         }
 
         if (button.index === 5 && button.pressed) {
-          this.handleMouseWheel(this.input.activePointer, [], 0, 1, 0);
+          this.handleMouseWheel(this.input.activePointer, [], 0, 1, 0, true);
         }
       },
       this
@@ -517,7 +524,6 @@ export default class GameScene extends Phaser.Scene {
     this.input.on(
       "pointermove",
       (pointer: Phaser.Input.Pointer) => {
-        console.log("ici");
         this.updateLighting(pointer.worldX, pointer.worldY);
       },
       this
@@ -531,9 +537,9 @@ export default class GameScene extends Phaser.Scene {
 
   private updateLighting(targetX: number, targetY: number) {
     const ambientLightIntensity = Phaser.Math.Clamp(
-      0.5 - this.depth / 1000,
+      0.5 + (2.0 - this.depth / 10) * 0.5,
       0.05,
-      0.5
+      1
     );
     const ambientColorValue = Phaser.Display.Color.HSVToRGB(
       0.6,
@@ -544,9 +550,9 @@ export default class GameScene extends Phaser.Scene {
     this.lights.setAmbientColor(ambientColor.color);
 
     this.submarineLight.intensity = Phaser.Math.Clamp(
-      0.7 + this.depth / 500,
+      0.7 + this.depth / 10,
       0.7,
-      1.5
+      2.0
     );
 
     const playerPos = this.player.getPosition();
