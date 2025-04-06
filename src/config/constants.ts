@@ -16,6 +16,11 @@ export const DEPTH_TORPEDO = 8;
 export const DEPTH_TORPEDO_LIGHT = 7;
 export const DEPTH_ENEMY = 5;
 
+export const COLORS = {
+  TORPEDO_SELECTED: '#FFFF00',
+  TORPEDO_DEFAULT: '#FFFFFF',
+};
+
 export const TORPEDO_POOL_SIZE = 5;
 export const TORPEDO_SPEED = 300;
 export const TORPEDO_LIFESPAN = 5000;

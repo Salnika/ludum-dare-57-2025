@@ -92,27 +92,20 @@ export default class Torpedo {
       .filter((sprite) => sprite !== undefined && sprite !== null);
   }
 
-  getRemainingTorpedos(): { [key: string]: number } {
-    const remaining: { [key: string]: number } = {};
-    this.torpedoPool.forEach((torpedo) => {
-      console.log("ici", torpedo);
-      if (!torpedo.isActive() && !torpedo.hasActiveLightEffect()) {
-        const typeName = TorpedoType[torpedo.type];
-        remaining[typeName] = (remaining[typeName] || 0) + 1;
-      }
-    });
-    return remaining;
+  getRemainingTorpedos(): typeof this.torpedoPool {
+    return this.torpedoPool;
   }
 
-  getRemainingTorpedosNumeric(): { [key in TorpedoType]?: number } {
-    const remaining: { [key in TorpedoType]?: number } = {};
-    this.torpedoPool.forEach((torpedo) => {
-      console.log("ici", torpedo);
-      if (!torpedo.isActive() && !torpedo.hasActiveLightEffect()) {
-        const typeValue = torpedo.type;
-        remaining[typeValue] = (remaining[typeValue] || 0) + 1;
+  getRemainingTorpedosNumeric(): Map<TorpedoType, number> {
+    const torpedoCount = new Map<TorpedoType, number>();
+
+    for (const torpedo of this.torpedoPool) {
+      if (!torpedo.hasBeenFired) {
+        const currentCount = torpedoCount.get(torpedo.type) || 0;
+        torpedoCount.set(torpedo.type, currentCount + 1);
       }
-    });
-    return remaining;
+    }
+
+    return torpedoCount;
   }
 }

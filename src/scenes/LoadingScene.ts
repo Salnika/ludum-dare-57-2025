@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import * as C from "../config/constants";
 
 export default class LoadingScene extends Phaser.Scene {
+  private gamepad: Phaser.Input.Gamepad.Gamepad | undefined;
   constructor() {
     super({ key: "LoadingScene" });
   }
@@ -64,7 +65,7 @@ export default class LoadingScene extends Phaser.Scene {
         key: C.ASSETS.TORPEDO_SPRITE,
         url: "assets/torpedo.png",
       },
-/*       {
+      /*       {
         type: "audio",
         key: C.ASSETS.BACKGROUND_SOUND,
         url: "assets/soundtrack.mp3",
@@ -88,14 +89,8 @@ export default class LoadingScene extends Phaser.Scene {
 
     this.load.on("complete", () => {
       console.log("All assets loaded");
-      loadingText.setText("Presse SPACE to play!");
-      if (this.input.keyboard) {
-        this.input.keyboard.on(
-          "keydown-SPACE",
-          () => this.scene.start("GameScene"),
-          this
-        );
-      }
+      loadingText.setText("Press START or SPACE to play!");
+      this.setupStartInput();
     });
 
     assets.forEach((asset) => {
@@ -109,5 +104,51 @@ export default class LoadingScene extends Phaser.Scene {
     });
   }
 
-  create() {  }
+  private setupStartInput() {
+    if (this.input.keyboard) {
+      this.input.keyboard.once("keydown-SPACE", () => this.startGame(), this);
+    }
+
+    if (!this.input.gamepad) {
+      return;
+    }
+    this.input.gamepad.once(
+      "connected",
+      (pad: Phaser.Input.Gamepad.Gamepad) => {
+        this.gamepad = pad;
+        this.setupStartInput();
+      },
+      this
+    );
+    if (this.gamepad) {
+      this.gamepad.on(
+        Phaser.Input.Gamepad.Events.BUTTON_DOWN,
+        (button: number) => {
+          console.log("ICI", button);
+          if (button === 0) {
+            this.startGame();
+          }
+        },
+        this
+      );
+    }
+  }
+
+  private async startGame() {
+    if (this.gamepad) {
+      console.log("ici");
+
+      console.log(
+        this.gamepad.listenerCount(Phaser.Input.Gamepad.Events.BUTTON_DOWN)
+      );
+      this.gamepad.removeAllListeners();
+
+      console.log(
+        this.gamepad.listenerCount(Phaser.Input.Gamepad.Events.BUTTON_DOWN)
+      );
+    }
+    this.scene.start("GameScene");
+  }
+
+  create() {}
 }
