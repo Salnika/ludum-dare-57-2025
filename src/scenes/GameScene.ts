@@ -354,7 +354,7 @@ export default class GameScene extends Phaser.Scene {
             spawnY,
             pointer.worldX,
             pointer.worldY,
-            TorpedoType.SHOCK
+            TorpedoType.LIGHT
           );
         }
       },

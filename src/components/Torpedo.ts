@@ -177,22 +177,22 @@ export default class SingleTorpedo {
 
     this.isActiveState = false;
 
-    if (this.light) {
+    if (this.light && this.type !== TorpedoType.LIGHT) {
       this.light.destroy();
       this.light = null;
     }
 
     if (this.type === TorpedoType.LIGHT) {
+      this.deactivateAfterAnim()
       if (this.light) {
         this.light.radius = 400;
         this.light.intensity = 0.4;
       }
     } else if (this.type === TorpedoType.EXPLOSION) {
-      this.sprite.preFX?.addGlow(0xfff1b5)
+      this.sprite.preFX?.addGlow(0xfff1b5);
       this.sprite.play("explosion");
-      
     } else if (this.type === TorpedoType.SHOCK) {
-      this.sprite.preFX?.addGlow(0xfff1b5)
+      this.sprite.preFX?.addGlow(0xfff1b5);
       this.sprite.play("shock");
     }
 
