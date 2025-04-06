@@ -20,6 +20,7 @@ export default class GameScene extends Phaser.Scene {
   private coneLight!: Phaser.GameObjects.PointLight;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private gamepad: Phaser.Input.Gamepad.Gamepad | undefined;
+  private backgroundSound!: Phaser.Sound.BaseSound;
   private torpedoManager!: Torpedo;
   private depth: number = 0;
   private isGameOver: boolean = false;
@@ -31,43 +32,77 @@ export default class GameScene extends Phaser.Scene {
     super({ key: "GameScene" });
   }
 
-  preload() {
-    this.load.spritesheet(C.ASSETS.SUBMARINE_SPRITESHEET, "assets/sub.png", {
-      frameWidth: 773,
-      frameHeight: 1024,
-    });
-    this.load.image(C.ASSETS.BACKGROUND_IMAGE, "assets/background.png");
-    this.load.audio(C.ASSETS.TORPEDO_SOUND, "assets/torpedo.mp3")
-    this.load.spritesheet(
-      C.ASSETS.JELLYFISH_SPRITESHEET,
-      "assets/jellyfish-upscale.png",
-      {
-        frameWidth: 128,
-        frameHeight: 128,
-      }
-    );
-    this.sonar = new Sonar(this);
-    this.sonar.preload();
-    this.load.image(C.ASSETS.TORPEDO_SPRITE, "assets/torpedo.png");
-    this.outlinePipelineInstanceBackground =
-      new outlinePipelineInstanceBackground(this.game);
-    this.player = new Player(this);
-  }
-
   create() {
     this.resetGame();
+
+    this.outlinePipelineInstanceBackground =
+      new outlinePipelineInstanceBackground(this.game);
     this.registerAndConfigureoutlinePipelineInstanceBackground();
-    this.setupLighting();
+
+    if (!this.anims.exists("jellyfish_idle")) {
+      this.anims.create({
+        key: "jellyfish_idle",
+        frames: this.anims.generateFrameNumbers(
+          C.ASSETS.JELLYFISH_SPRITESHEET,
+          { start: 0, end: 4 }
+        ),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
+    if (!this.anims.exists("jellyfish_swim")) {
+      this.anims.create({
+        key: "jellyfish_swim",
+        frames: this.anims.generateFrameNumbers(
+          C.ASSETS.JELLYFISH_SPRITESHEET,
+          { start: 7, end: 11 }
+        ),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
+    if (!this.anims.exists("jellyfish_swim2")) {
+      this.anims.create({
+        key: "jellyfish_swim2",
+        frames: this.anims.generateFrameNumbers(
+          C.ASSETS.JELLYFISH_SPRITESHEET,
+          { start: 15, end: 18 }
+        ),
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
+    if (!this.anims.exists("jellyfish_die")) {
+      this.anims.create({
+        key: "jellyfish_die",
+        frames: this.anims.generateFrameNumbers(
+          C.ASSETS.JELLYFISH_SPRITESHEET,
+          { start: 21, end: 27 }
+        ),
+        frameRate: 6,
+        repeat: 0,
+      });
+    }
+
+     this.backgroundSound = this.sound.add(C.ASSETS.BACKGROUND_SOUND, {
+          volume: 0.5,
+          loop: false,
+        });
+
+    this.sonar = new Sonar(this);
+    this.player = new Player(this);
     this.backgroundManager = new BackgroundManager(this);
+    this.torpedoManager = new Torpedo(this, 3, this.backgroundManager);
+    this.uiManager = new UIManager(this);
+    this.bubbleEmitter = new BubbleEmitter(this);
+
     this.backgroundManager.create(this.outlinePipelineInstanceBackground);
     this.player.create(this.scale.width / 2, this.scale.height * 0.2);
-    this.torpedoManager = new Torpedo(this, 3, this.backgroundManager);
     this.sonar.create(this.outlinePipelineInstanceBackground);
-    this.uiManager = new UIManager(this);
     this.uiManager.create();
-    this.bubbleEmitter = new BubbleEmitter(this);
     this.bubbleEmitter.create();
 
+    this.setupLighting();
     this.jellyfishGroup = this.physics.add.group({
       classType: Jellyfish,
       runChildUpdate: true,
@@ -78,8 +113,10 @@ export default class GameScene extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
+
     this.setupInput();
     this.setupCollisions();
+    this.backgroundSound.play()
   }
 
   private resetGame(): void {
@@ -144,8 +181,7 @@ export default class GameScene extends Phaser.Scene {
 
     const jellyfish = this.jellyfishGroup.get(spawnSide, spawnY) as Jellyfish;
     if (jellyfish) {
-      jellyfish.setActive(true);
-      jellyfish.setVisible(true);
+      jellyfish.init();
     }
   }
 
@@ -172,12 +208,12 @@ export default class GameScene extends Phaser.Scene {
     let targetX: number;
     let targetY: number;
     targetX = this.input.activePointer.worldX;
-      targetY = this.input.activePointer.worldY;
+    targetY = this.input.activePointer.worldY;
     if (this.gamepad) {
       targetX =
         this.player.getPosition().x + this.gamepad.axes[0].getValue() * 400;
       targetY =
-        this.player.getPosition().y + this.gamepad.axes[1].getValue() * 400;      
+        this.player.getPosition().y + this.gamepad.axes[1].getValue() * 400;
     }
     return { targetX, targetY };
   }
@@ -206,7 +242,7 @@ export default class GameScene extends Phaser.Scene {
     this.submarineLight.radius = 200;
     this.submarineLight.attenuation = 0.03;
 
-    this.coneLight = this.add.pointlight(0, 0, 0xFFC000, 300);
+    this.coneLight = this.add.pointlight(0, 0, 0xffc000, 300);
     this.coneLight.radius = 300;
     this.coneLight.attenuation = 0.03;
   }
@@ -252,16 +288,16 @@ export default class GameScene extends Phaser.Scene {
       ) => {
         if (button.index === 7 && button.pressed) {
           if (!this.isGameOver && this.gamepad) {
-            let targetX =
-              this.player.getPosition().x +
-              this.gamepad.axes[0].getValue() * 200;
-            let targetY =
-              this.player.getPosition().y +
-              this.gamepad.axes[1].getValue() * 200;
-            const playerPos = this.player.getPosition();
+            const playerSprite = this.player.getSprite();
+            const spawnX = playerSprite.x;
+            const spawnY = playerSprite.y + (playerSprite.height * 0.1) / 2;
+
+            let targetX = spawnX + this.gamepad.axes[0].getValue() * 200;
+            let targetY = spawnY + this.gamepad.axes[1].getValue() * 200;
+
             this.torpedoManager.fireTorpedo(
-              playerPos.x,
-              playerPos.y,
+              spawnX,
+              spawnY,
               targetX,
               targetY,
               TorpedoType.LIGHT
@@ -281,10 +317,12 @@ export default class GameScene extends Phaser.Scene {
       Phaser.Input.Events.POINTER_DOWN,
       (pointer: Phaser.Input.Pointer) => {
         if (!this.isGameOver && pointer.leftButtonDown()) {
-          const playerPos = this.player.getPosition();
+          const playerSprite = this.player.getSprite();
+          const spawnX = playerSprite.x;
+          const spawnY = playerSprite.y + (playerSprite.height * 0.1) / 2;
           this.torpedoManager.fireTorpedo(
-            playerPos.x,
-            playerPos.y,
+            spawnX,
+            spawnY,
             pointer.worldX,
             pointer.worldY,
             TorpedoType.LIGHT
@@ -359,7 +397,6 @@ export default class GameScene extends Phaser.Scene {
       const screenX = playerPos.x;
       const screenY = playerPos.y;
       this.sonar.activate(new Phaser.Math.Vector2(screenX, screenY));
-      this.sonarActivationTimestamp = Date.now();
       this.backgroundManager.applySonarEffect();
     }
   }

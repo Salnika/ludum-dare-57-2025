@@ -2,8 +2,6 @@ import Phaser from "phaser";
 import GameScene from "../scenes/GameScene";
 import * as C from "../config/constants";
 
-
-
 export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
   private sceneRef: GameScene;
   private timeAlive: number = 0;
@@ -14,6 +12,7 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
   private copy: Phaser.GameObjects.Sprite | null = null;
   public isDying: boolean = false;
   public isGlowing: boolean = false;
+
   constructor(scene: GameScene, x: number, y: number) {
     super(scene, x, y, C.ASSETS.JELLYFISH_SPRITESHEET);
     this.sceneRef = scene;
@@ -26,62 +25,19 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    if (!this.body) return;
-    this.setCollideWorldBounds(false);
-    this.setDepth(C.DEPTH_ENEMY);
-    this.setPipeline("Light2D");
-    this.initAnimations();
-
-    this.play("jellyfish_idle");
+    this.setActive(false);
+    this.setVisible(false);
   }
 
-  private initAnimations(): void {
-    const anims = this.sceneRef.anims;
-
-    if (!anims.exists("jellyfish_idle")) {
-      anims.create({
-        key: "jellyfish_idle",
-        frames: anims.generateFrameNumbers(C.ASSETS.JELLYFISH_SPRITESHEET, {
-          start: 0,
-          end: 4,
-        }),
-        frameRate: 6,
-        repeat: -1,
-      });
+  init() {
+    this.setActive(true);
+    this.setVisible(true);
+    if (this.body) {
+      this.setCollideWorldBounds(false);
+      this.setDepth(C.DEPTH_ENEMY);
+      this.setPipeline("Light2D");
     }
-    if (!anims.exists("jellyfish_swim")) {
-      anims.create({
-        key: "jellyfish_swim",
-        frames: anims.generateFrameNumbers(C.ASSETS.JELLYFISH_SPRITESHEET, {
-          start: 7,
-          end: 11,
-        }),
-        frameRate: 6,
-        repeat: -1,
-      });
-    }
-    if (!anims.exists("jellyfish_swim2")) {
-      anims.create({
-        key: "jellyfish_swim2",
-        frames: anims.generateFrameNumbers(C.ASSETS.JELLYFISH_SPRITESHEET, {
-          start: 15,
-          end: 18,
-        }),
-        frameRate: 6,
-        repeat: -1,
-      });
-    }
-    if (!anims.exists("jellyfish_die")) {
-      anims.create({
-        key: "jellyfish_die",
-        frames: anims.generateFrameNumbers(C.ASSETS.JELLYFISH_SPRITESHEET, {
-          start: 21,
-          end: 27,
-        }),
-        frameRate: 6,
-        repeat: 0,
-      });
-    }
+    this.play("jellyfish_idle");
   }
 
   preUpdate(time: number, delta: number): void {
@@ -124,6 +80,7 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
       this.destroy();
     }
   }
+
   applySonarEffect(): void {
     if (this.isDying || this.isGlowing) return;
     const anim = Math.random() < 0.5 ? "jellyfish_swim" : "jellyfish_swim2";
@@ -146,8 +103,7 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
     }
 
     // @ts-expect-error
-    this.preFX.addGlow(0x00ff00, 3);
-    this.setPipeline("Light2d");
+    this.preFX.addGlow(0x00ff00, 3); 
     this.isGlowing = true;
 
     if (!this.sonarTimer) {
@@ -158,13 +114,13 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
       });
     }
   }
+
   removeSonarEffect(): void {
     this.isAffectedBySonar = false;
 
     // @ts-expect-error
     this.preFX.clear();
     this.isGlowing = false;
-    this.setPipeline("Light2D");
 
     if (this.sonarTimer) {
       this.sonarTimer.remove(false);

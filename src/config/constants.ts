@@ -1,6 +1,6 @@
 export const MAX_ROTATION_ANGLE: number = 10;
 export const SONAR_SPEED: number = 200;
-export const MAX_SONAR_RADIUS: number = 300;
+export const MAX_SONAR_RADIUS: number = 350;
 export const BACKGROUND_SCROLL_SPEED: number = 1;
 
 export const SECONDARY_SONAR_OFFSET: number = 20;
@@ -32,12 +32,12 @@ export const JELLYFISH_SONAR_DURATION = 2000;
 export const ASSETS = {
   SUBMARINE_SPRITESHEET: "submarine",
   BACKGROUND_IMAGE: "background",
-  SONAR_PING_SOUND: "sonarPing",
-  BACKGROUND_SOUND: "background",
-  BUBBLE_PARTICLE_TEXTURE: "bubble_particle",
+  SONAR_PING_SOUND: "sonar-ping",
+  BACKGROUND_SOUND: "background-sound",
+  BUBBLE_PARTICLE_TEXTURE: "bubble-particle",
   TORPEDO_SPRITE: "torpedo",
   JELLYFISH_SPRITESHEET: 'jellyfish-upscale',
-  TORPEDO_SOUND: 'torpedoSound',
+  TORPEDO_SOUND: 'torpedo-sound',
 };
 
 export const ANIMATIONS = {

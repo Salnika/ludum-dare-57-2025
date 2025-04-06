@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import GameScene from './scenes/GameScene'
 import PrepScene from './scenes/PrepScene'
 import PostScene from './scenes/PostScene'
+import LoadingScene from './scenes/LoadingScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.WEBGL,
@@ -15,7 +16,7 @@ const config: Phaser.Types.Core.GameConfig = {
   input: {
     gamepad: true
 },
-  scene: GameScene,
+  scene: [LoadingScene, GameScene],
 };
 
 new Phaser.Game(config)

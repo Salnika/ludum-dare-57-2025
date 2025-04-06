@@ -30,6 +30,7 @@ export default class Player {
       .setCollideWorldBounds(true);
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+
     body.setAllowGravity(false);
     body.setImmovable(false);
   }
@@ -104,14 +105,40 @@ export default class Player {
   getPosition(): Phaser.Math.Vector2 {
     return new Phaser.Math.Vector2(this.sprite.x, this.sprite.y);
   }
-  
+
   getSprite(): Phaser.Physics.Arcade.Sprite {
-    return this.sprite
+    return this.sprite;
   }
 
   handleCollision(): void {
     if (!this.sprite?.active) return;
-    this.sprite.setTint(0xff0000).anims.stop();
+    this.die();
+  }
+
+  die(): void {
+    if (!this.sprite?.active) return;
+
+    const particles = this.scene.add
+      .particles(this.sprite.x, this.sprite.y, "redPixel", {
+        speed: { min: 150, max: 350 },
+        angle: { min: 0, max: 360 },
+        scale: { start: 2, end: 0 },
+        alpha: { start: 1, end: 0 },
+        lifespan: { min: 500, max: 1000 },
+        quantity: 200,
+        blendMode: Phaser.BlendModes.ADD,
+      })
+      .setDepth(C.DEPTH_PLAYER + 1);
+
+    particles.start();
+
+    this.disable();
+
+    this.scene.time.delayedCall(1000, () => {
+      particles.stop();
+      particles.destroy();
+      this.sprite.destroy();
+    });
   }
 
   resetState(x: number, y: number): void {

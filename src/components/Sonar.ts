@@ -16,10 +16,6 @@ export default class Sonar {
     this.scene = scene;
   }
 
-  preload(): void {
-    this.scene.load.audio(C.ASSETS.SONAR_PING_SOUND, "assets/sonar.mp3");
-  }
-
   create(
     outlinePipeline?: OutlinePipeline,
   ): void {
