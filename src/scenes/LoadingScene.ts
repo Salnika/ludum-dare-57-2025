@@ -48,6 +48,18 @@ export default class LoadingScene extends Phaser.Scene {
         config: { frameWidth: 128, frameHeight: 128 },
       },
       {
+        type: "spritesheet",
+        key: C.ASSETS.EXPLOSION_SPRITESHEET,
+        url: "assets/explosion.png",
+        config: { frameWidth: 128, frameHeight: 128 },
+      },
+      {
+        type: "spritesheet",
+        key: C.ASSETS.SHOCK_SPRITESHEET,
+        url: "assets/shock.png",
+        config: { frameWidth: 128, frameHeight: 128 },
+      },
+      {
         type: "image",
         key: C.ASSETS.TORPEDO_SPRITE,
         url: "assets/torpedo.png",

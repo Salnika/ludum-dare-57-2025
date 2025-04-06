@@ -81,7 +81,7 @@ export default class SingleTorpedo {
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     if (body) {
       this.scene.physics.velocityFromRotation(
-        angle, 
+        angle,
         this.config.speed,
         body.velocity
       );
@@ -133,6 +133,8 @@ export default class SingleTorpedo {
       } else {
         this.light.x = this.sprite.x;
         this.light.y = this.sprite.y;
+      }
+      if (this.sprite) {
         this.sprite.y -= scrollAmount;
       }
     }
@@ -160,32 +162,6 @@ export default class SingleTorpedo {
     }
   }
 
-  explode() {
-    if (!this.isActiveState) return;
-
-    this.isActiveState = false;
-
-    this.deactivate();
-
-    if (this.light) {
-      this.light.radius = 400;
-      this.light.intensity = 0.4;
-    }
-  }
-
-  deactivate() {
-    this.isActiveState = false;
-
-    if (this.sprite.body) {
-      const body = this.sprite.body as Phaser.Physics.Arcade.Body;
-      body.setVelocity(0, 0);
-      body.setEnable(false);
-    }
-
-    this.sprite.setVisible(false);
-    this.sprite.setActive(false);
-  }
-
   public handleHit(
     torpedoSprite: Phaser.Physics.Arcade.Sprite,
     target: Phaser.Physics.Arcade.Sprite
@@ -194,5 +170,43 @@ export default class SingleTorpedo {
       return;
     }
     this.resetState();
+  }
+
+  explode() {
+    if (!this.isActiveState) return;
+
+    this.isActiveState = false;
+
+    if (this.light) {
+      this.light.destroy();
+      this.light = null;
+    }
+
+    if (this.type === TorpedoType.LIGHT) {
+      if (this.light) {
+        this.light.radius = 400;
+        this.light.intensity = 0.4;
+      }
+    } else if (this.type === TorpedoType.EXPLOSION) {
+      this.sprite.preFX?.addGlow(0xfff1b5)
+      this.sprite.play("explosion");
+      
+    } else if (this.type === TorpedoType.SHOCK) {
+      this.sprite.preFX?.addGlow(0xfff1b5)
+      this.sprite.play("shock");
+    }
+
+    this.sprite.on("animationcomplete", this.deactivateAfterAnim, this);
+
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body;
+    body.setVelocity(0, 0);
+    body.setEnable(false);
+  }
+
+  deactivateAfterAnim() {
+    this.sprite.off("animationcomplete", this.deactivateAfterAnim, this);
+    this.sprite.stop();
+    this.sprite.setVisible(false);
+    this.sprite.setActive(false);
   }
 }

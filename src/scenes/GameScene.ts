@@ -39,6 +39,30 @@ export default class GameScene extends Phaser.Scene {
       new outlinePipelineInstanceBackground(this.game);
     this.registerAndConfigureoutlinePipelineInstanceBackground();
 
+    if (!this.anims.exists("explosion")) {
+      this.anims.create({
+        key: "explosion",
+        frames: this.anims.generateFrameNumbers(
+          C.ASSETS.EXPLOSION_SPRITESHEET,
+          { start: 0, end: 8 }
+        ),
+        frameRate: 10,
+        repeat: 0,
+      }); 
+    }
+
+    if (!this.anims.exists("shock")) {
+      this.anims.create({
+        key: "shock",
+        frames: this.anims.generateFrameNumbers(
+          C.ASSETS.SHOCK_SPRITESHEET,
+          { start: 0, end: 8 }
+        ),
+        frameRate: 10,
+        repeat: 0,
+      }); 
+    }
+
     if (!this.anims.exists("jellyfish_idle")) {
       this.anims.create({
         key: "jellyfish_idle",
@@ -84,7 +108,7 @@ export default class GameScene extends Phaser.Scene {
       });
     }
 
-/*      this.backgroundSound = this.sound.add(C.ASSETS.BACKGROUND_SOUND, {
+    /*      this.backgroundSound = this.sound.add(C.ASSETS.BACKGROUND_SOUND, {
           volume: 0.5,
           loop: false,
         }); */
@@ -95,9 +119,12 @@ export default class GameScene extends Phaser.Scene {
     this.torpedoManager = new Torpedo(this, this.backgroundManager);
     this.uiManager = new UIManager(this);
     this.bubbleEmitter = new BubbleEmitter(this);
-    console.log('ici', [TorpedoType.LIGHT, TorpedoType.EXPLOSION, TorpedoType.SHOCK])
 
-    this.torpedoManager.loadTorpedos([TorpedoType.LIGHT, TorpedoType.EXPLOSION, TorpedoType.SHOCK])
+    this.torpedoManager.loadTorpedos([
+      TorpedoType.LIGHT,
+      TorpedoType.EXPLOSION,
+      TorpedoType.SHOCK,
+    ]);
     this.backgroundManager.create(this.outlinePipelineInstanceBackground);
     this.player.create(this.scale.width / 2, this.scale.height * 0.2);
     this.sonar.create(this.outlinePipelineInstanceBackground);
@@ -118,7 +145,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.setupInput();
     this.setupCollisions();
- //   this.backgroundSound.play()
+    //   this.backgroundSound.play()
   }
 
   private resetGame(): void {
@@ -189,7 +216,7 @@ export default class GameScene extends Phaser.Scene {
 
   update(time: number, delta: number) {
     if (this.isGameOver) return;
-    
+
     const dt = delta / 1000;
     const { targetX, targetY } = this.getTargetCoordinates();
 
@@ -302,7 +329,7 @@ export default class GameScene extends Phaser.Scene {
               spawnY,
               targetX,
               targetY,
-              TorpedoType.LIGHT
+              TorpedoType.SHOCK
             );
           }
         }
@@ -327,7 +354,7 @@ export default class GameScene extends Phaser.Scene {
             spawnY,
             pointer.worldX,
             pointer.worldY,
-            TorpedoType.LIGHT
+            TorpedoType.SHOCK
           );
         }
       },

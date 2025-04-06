@@ -13,12 +13,12 @@ export const DEPTH_BACKGROUND = 0;
 export const DEPTH_LIGHT = 10;
 export const DEPTH_UI = 20;
 export const DEPTH_TORPEDO = 8;
-export const DEPTH_TORPEDO_LIGHT = 7
-export const DEPTH_ENEMY = 5
+export const DEPTH_TORPEDO_LIGHT = 7;
+export const DEPTH_ENEMY = 5;
 
 export const TORPEDO_POOL_SIZE = 5;
 export const TORPEDO_SPEED = 300;
-export const TORPEDO_LIFESPAN = 5000; 
+export const TORPEDO_LIFESPAN = 5000;
 export const TORPEDO_LIGHT_RADIUS = 250;
 export const TORPEDO_LIGHT_INTENSITY = 1.5;
 export const TORPEDO_LIGHT_ATTENUATION = 0.02;
@@ -36,8 +36,10 @@ export const ASSETS = {
   BACKGROUND_SOUND: "background-sound",
   BUBBLE_PARTICLE_TEXTURE: "bubble-particle",
   TORPEDO_SPRITE: "torpedo",
-  JELLYFISH_SPRITESHEET: 'jellyfish-upscale',
-  TORPEDO_SOUND: 'torpedo-sound',
+  JELLYFISH_SPRITESHEET: "jellyfish-upscale",
+  TORPEDO_SOUND: "torpedo-sound",
+  EXPLOSION_SPRITESHEET: "explosion",
+  SHOCK_SPRITESHEET: "shock"
 };
 
 export const ANIMATIONS = {
