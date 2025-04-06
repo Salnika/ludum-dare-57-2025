@@ -4,22 +4,20 @@ import SingleTorpedo from "./Torpedo";
 import BackgroundManager from "./BackgroundManager";
 
 export default class Torpedo {
-  private torpedoPool: SingleTorpedo[] = [];
+  private torpedoGroup: Phaser.Physics.Arcade.Group;
   private scene: Phaser.Scene;
   private backgroundManager: BackgroundManager;
 
   constructor(scene: Phaser.Scene, backgroundManager: BackgroundManager) {
     this.scene = scene;
-    this.torpedoPool = [];
     this.backgroundManager = backgroundManager;
+    this.torpedoGroup = this.scene.physics.add.group({
+      runChildUpdate: true,
+    });
   }
 
   loadTorpedos(types: TorpedoType[]): void {
-    this.torpedoPool.forEach((torpedo) => {
-      if (torpedo.sprite) {
-        torpedo.sprite.destroy();
-      }
-    });
+    this.torpedoGroup.clear(true, true);
 
     for (const type of types) {
       const torpedo = new SingleTorpedo(
@@ -28,25 +26,29 @@ export default class Torpedo {
         this.backgroundManager
       );
       torpedo.resetState();
-      this.torpedoPool.push(torpedo);
+      this.torpedoGroup.add(torpedo.sprite);
     }
   }
 
   removeTorpedoFromPool(torpedoToRemove: SingleTorpedo) {
-    this.torpedoPool = this.torpedoPool.filter(
-      (torped) => torped.id !== torpedoToRemove.id
-    );
+    this.torpedoGroup.remove(torpedoToRemove.sprite, true, true);
   }
 
   getTorpedo(type: TorpedoType): SingleTorpedo | null {
-    const inactiveTorpedo = this.torpedoPool.find(
-      (torpedo) =>
+    let foundTorpedo: SingleTorpedo | null = null;
+    this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
+      const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
+      if (
         torpedo.type === type &&
         !torpedo.isActive() &&
         !torpedo.hasActiveLightEffect() &&
         !torpedo.hasBeenFired
-    );
-    return inactiveTorpedo || null;
+      ) {
+        foundTorpedo = torpedo;
+        return false;
+      }
+    }, this);
+    return foundTorpedo;
   }
 
   fireTorpedo(
@@ -67,41 +69,54 @@ export default class Torpedo {
   }
 
   update(time: number, delta: number): void {
-    this.torpedoPool.forEach((torpedo) => {
-      if (torpedo.isActive() || torpedo.hasActiveLightEffect()) {
+    this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
+      const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
+      if (
+        torpedo.isActive() ||
+        torpedo.hasActiveLightEffect() ||
+        !torpedo.hasExploded
+      ) {
         torpedo.update(time, delta);
       }
-      if (
-        !torpedo.isActive() &&
-        !torpedo.hasActiveLightEffect() &&
-        torpedo.hasBeenFired
-      ) {
+      if (torpedo.hasExploded) {
         this.removeTorpedoFromPool(torpedo);
       }
-    });
+    }, this);
   }
 
   getActiveTorpedoSprites(): Phaser.Physics.Arcade.Sprite[] {
-    return this.torpedoPool
-      .filter((torpedo) => torpedo.isActive())
-      .map((torpedo) => torpedo.sprite)
-      .filter((sprite) => sprite !== undefined && sprite !== null);
+    const activeSprites: Phaser.Physics.Arcade.Sprite[] = [];
+    this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
+      const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
+      if (torpedo.isActive()) {
+        activeSprites.push(child as Phaser.Physics.Arcade.Sprite);
+      }
+    }, this);
+    return activeSprites;
   }
 
-  getRemainingTorpedos(): typeof this.torpedoPool {
-    return this.torpedoPool;
+  getRemainingTorpedos(): SingleTorpedo[] {
+    const remainingTorpedos: SingleTorpedo[] = [];
+    this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
+      const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
+      remainingTorpedos.push(torpedo);
+    }, this);
+    return remainingTorpedos;
   }
 
   getRemainingTorpedosNumeric(): Map<TorpedoType, number> {
     const torpedoCount = new Map<TorpedoType, number>();
-
-    for (const torpedo of this.torpedoPool) {
+    this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
+      const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
       if (!torpedo.hasBeenFired) {
         const currentCount = torpedoCount.get(torpedo.type) || 0;
         torpedoCount.set(torpedo.type, currentCount + 1);
       }
-    }
-
+    }, this);
     return torpedoCount;
+  }
+
+  getGroup() {
+    return this.torpedoGroup;
   }
 }

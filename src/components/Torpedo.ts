@@ -14,7 +14,8 @@ export default class SingleTorpedo {
   private light!: Phaser.GameObjects.PointLight | null;
   private backgroundManager: BackgroundManager;
   public hasBeenFired: boolean = false;
-
+  public hasExploded: boolean = false;
+  public bodyIncrease: number = 1;
   constructor(
     scene: Phaser.Scene,
     type: TorpedoType,
@@ -25,6 +26,7 @@ export default class SingleTorpedo {
     this.type = type;
     this.config = TorpedoConfig[type];
     this.backgroundManager = backgroundManager;
+
     if (!this.config) {
       console.error(
         `Configuration manquante pour le type de torpille: ${type}`
@@ -40,7 +42,7 @@ export default class SingleTorpedo {
 
     this.sprite.setActive(false).setVisible(false);
     this.sprite.setDepth(C.DEPTH_TORPEDO);
-    this.sprite.setTint(this.config.lightColor)
+    this.sprite.setTint(this.config.lightColor);
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     if (body) {
       body.setAllowGravity(false);
@@ -49,7 +51,6 @@ export default class SingleTorpedo {
     }
     this.light = null;
   }
-
   fireTorpedo(
     startX: number,
     startY: number,
@@ -125,9 +126,9 @@ export default class SingleTorpedo {
   }
 
   update(time: number, delta: number): void {
-    if (this.light) {
-      const scrollAmount = C.BACKGROUND_SCROLL_SPEED * (delta / 16.66);
+    const scrollAmount = C.BACKGROUND_SCROLL_SPEED * (delta / 16.66);
 
+    if (this.light) {
       if (!this.isActiveState) {
         this.light.y -= scrollAmount;
       } else {
@@ -137,6 +138,23 @@ export default class SingleTorpedo {
       if (this.sprite) {
         this.sprite.y -= scrollAmount;
       }
+    }
+
+    if (
+      !this.isActiveState &&
+      !this.hasExploded &&
+      this.sprite.body &&
+      this.hasBeenFired
+    ) {
+      console.log("ICI");
+      this.bodyIncrease += 1;
+      const offsetX =
+        (this.sprite.width + this.bodyIncrease) / 2 - this.bodyIncrease;
+      const offsetY =
+        (this.sprite.height + this.bodyIncrease) / 2 -
+        this.bodyIncrease -
+        scrollAmount;
+      this.sprite.body?.setCircle(this.bodyIncrease, offsetX, offsetY);
     }
 
     if (!this.isActiveState) {
@@ -162,16 +180,6 @@ export default class SingleTorpedo {
     }
   }
 
-  public handleHit(
-    torpedoSprite: Phaser.Physics.Arcade.Sprite,
-    target: Phaser.Physics.Arcade.Sprite
-  ): void {
-    if (!this.isActiveState) {
-      return;
-    }
-    this.resetState();
-  }
-
   explode() {
     if (!this.isActiveState) return;
 
@@ -183,18 +191,20 @@ export default class SingleTorpedo {
     }
 
     if (this.type === TorpedoType.LIGHT) {
-      this.deactivateAfterAnim()
+      this.deactivateAfterAnim();
       if (this.light) {
         this.light.radius = 400;
         this.light.intensity = 0.4;
       }
     } else if (this.type === TorpedoType.EXPLOSION) {
-      this.sprite.setScale(1);
-      this.sprite.preFX?.addGlow(0xfff1b5);
+      this.sprite.body?.setCircle(15);
+      this.sprite.setScale(2);
+      this.sprite.preFX?.addGlow(this.config.lightColor);
       this.sprite.play("explosion");
     } else if (this.type === TorpedoType.SHOCK) {
-      this.sprite.setScale(1);
-      this.sprite.preFX?.addGlow(0xfff1b5);
+      this.sprite.setScale(2);
+      this.sprite.body?.setCircle(15);
+      this.sprite.preFX?.addGlow(this.config.lightColor);
       this.sprite.play("shock");
     }
 
@@ -202,7 +212,6 @@ export default class SingleTorpedo {
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
     body.setVelocity(0, 0);
-    body.setEnable(false);
   }
 
   deactivateAfterAnim() {
@@ -210,5 +219,6 @@ export default class SingleTorpedo {
     this.sprite.stop();
     this.sprite.setVisible(false);
     this.sprite.setActive(false);
+    this.hasExploded = true;
   }
 }

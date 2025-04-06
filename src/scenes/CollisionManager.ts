@@ -1,27 +1,28 @@
 import Phaser from "phaser";
 import Player from "../components/Player";
-import Torpedo from "../components/TorpedoManager";
+import torpedoManager from "../components/TorpedoManager";
 import Jellyfish from "../components/Jellyfish";
 import BackgroundManager from "../components/BackgroundManager";
 import Sonar from "../components/Sonar";
 import BubbleEmitter from "../effects/BubbleEmitter";
 import * as C from "../config/constants";
+import Torpedo from "../components/Torpedo";
+import { TorpedoType } from "../components/TorpedoTypes";
 
 export default class CollisionManager {
   constructor(
     private scene: Phaser.Scene,
     private player: Player,
-    private torpedoManager: Torpedo,
+    private torpedoManager: torpedoManager,
     private jellyfishGroup: Phaser.Physics.Arcade.Group,
     private backgroundManager: BackgroundManager,
     private sonar: Sonar,
     private bubbleEmitter: BubbleEmitter,
     private jellyfishSpawnTimer: Phaser.Time.TimerEvent
-  ) {
-  }
+  ) {}
 
   setupCollisions(): void {
-    /* const torpedoGroup = this.torpedoManager.getGroup();
+    const torpedoGroup = this.torpedoManager.getGroup();
     if (torpedoGroup) {
       this.scene.physics.add.overlap(
         torpedoGroup,
@@ -32,8 +33,8 @@ export default class CollisionManager {
       );
     } else {
       console.warn("Could not get torpedo group for collision setup.");
-    } */
-    /*
+    }
+
     this.scene.physics.add.overlap(
       this.player.getSprite(),
       this.jellyfishGroup,
@@ -41,7 +42,6 @@ export default class CollisionManager {
       undefined,
       this
     );
-    */
   }
 
   handlePlayerJellyfishCollision(
@@ -49,11 +49,22 @@ export default class CollisionManager {
     jellyfishGameObject: Phaser.GameObjects.GameObject
   ): void {
     const jellyfish = jellyfishGameObject as Jellyfish;
+    console.log(jellyfish);
     if (this.scene.getIsGameOver() || jellyfish.isDying) {
       return;
     }
-    jellyfish.die();
-    this.handlePlayerCollision();
+    if (!playerSprite.body || !jellyfish.body) {
+      return;
+    }
+    if (playerSprite.body?.position?.y > jellyfish.body?.position.y) {
+      if (playerSprite.body.position.y - jellyfish.body.position.y <= 15) {
+        jellyfish.die();
+        this.handlePlayerCollision();
+      }
+    } else {
+      jellyfish.die();
+      this.handlePlayerCollision();
+    }
   }
 
   handleTorpedoJellyfishCollision(
@@ -61,27 +72,25 @@ export default class CollisionManager {
     jellyfishGameObject: Phaser.GameObjects.GameObject
   ): void {
     const jellyfish = jellyfishGameObject as Jellyfish;
-    const torpedoSprite = torpedoGameObject as Phaser.Physics.Arcade.Sprite;
-    const torpedoInstance = torpedoSprite.getData(
-      "instance"
-    ) as import("../components/Torpedo").default;
+    console.log(torpedoGameObject);
+    const torpedo = torpedoGameObject.getData("torpedoInstance") as Torpedo;
 
     if (
       !jellyfish.active ||
       jellyfish.isDying ||
-      !torpedoSprite.active ||
-      !torpedoInstance ||
-      !torpedoInstance.isActive()
+      !torpedo.isActive() ||
+      !torpedo ||
+      !torpedo
     ) {
       return;
     }
 
-    jellyfish.die();
-
-    if (torpedoInstance.explode) {
-      torpedoInstance.explode();
-    } else {
-      torpedoSprite.destroy();
+    if (torpedo.type === TorpedoType.EXPLOSION) {
+      jellyfish.die();
+      torpedo.explode();
+    } else if (torpedo.type === TorpedoType.SHOCK) {
+      jellyfish.stun();
+      torpedo.explode();
     }
   }
 
@@ -89,7 +98,7 @@ export default class CollisionManager {
     const playerBounds = this.player.getSprite().getBounds();
     const checkPoints = [
       { x: playerBounds.centerX, y: playerBounds.centerY },
-      { x: playerBounds.left + 5, y: playerBounds.centerY },
+      { x: playerBounds.left + 50, y: playerBounds.centerY },
       { x: playerBounds.right - 5, y: playerBounds.centerY },
       { x: playerBounds.centerX, y: playerBounds.top + 5 },
       { x: playerBounds.centerX, y: playerBounds.bottom - 5 },

@@ -33,8 +33,8 @@ export default class LoadingScene extends Phaser.Scene {
       {
         type: "spritesheet",
         key: C.ASSETS.SUBMARINE_SPRITESHEET,
-        url: "assets/sub.png",
-        config: { frameWidth: 773, frameHeight: 1024 },
+        url: "assets/sub-10.png",
+        config: { frameWidth: 77, frameHeight: 102 },
       },
       {
         type: "image",

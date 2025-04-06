@@ -4,16 +4,17 @@ import BackgroundManager from "../components/BackgroundManager";
 import Sonar from "../components/Sonar";
 import UIManager from "../ui/UIManager";
 import BubbleEmitter from "../effects/BubbleEmitter";
-import Torpedo from "../components/TorpedoManager";
+import TorpedoManager from "../components/TorpedoManager";
 import { TorpedoType } from "../components/TorpedoTypes";
 import GameStateManager from "./GameStateManager";
 import AnimationManager from "./AnimationManager";
 import CollisionManager from "./CollisionManager";
-import InputManager from "./InputManager";
 import LightingManager from "./LightingManager";
 import SonarEffectManager from "./SonarEffectManager";
 import JellyfishSpawnManager from "./JellyfishSpawnManager";
 import PipelineManager from "./PipelineManager";
+import Torpedo from "../components/Torpedo";
+import InputManager from "./InputManager";
 
 export default class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -21,7 +22,7 @@ export default class GameScene extends Phaser.Scene {
   private backgroundManager!: BackgroundManager;
   private uiManager!: UIManager;
   private bubbleEmitter!: BubbleEmitter;
-  private torpedoManager!: Torpedo;
+  private torpedoManager!: TorpedoManager;
   private gameStateManager!: GameStateManager;
   private animationManager!: AnimationManager;
   private collisionManager!: CollisionManager;
@@ -48,7 +49,7 @@ export default class GameScene extends Phaser.Scene {
     this.sonar = new Sonar(this);
     this.player = new Player(this);
     this.backgroundManager = new BackgroundManager(this);
-    this.torpedoManager = new Torpedo(this, this.backgroundManager);
+    this.torpedoManager = new TorpedoManager(this, this.backgroundManager);
     this.uiManager = new UIManager(this);
     this.bubbleEmitter = new BubbleEmitter(this);
 
@@ -58,7 +59,9 @@ export default class GameScene extends Phaser.Scene {
       TorpedoType.SHOCK,
     ]);
     this.gameStateManager.setAvailableTorpedoTypes(
-      this.torpedoManager.getRemainingTorpedos().map((torpedo) => torpedo.type)
+      this.torpedoManager
+        .getRemainingTorpedos()
+        .map((torpedo: Torpedo) => torpedo.type)
     );
     if (this.gameStateManager.getAvailableTorpedoTypes().length > 0) {
       this.gameStateManager.setSelectedTorpedoType(
@@ -145,10 +148,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   getIsGameOver() {
-    return this.gameStateManager.isGameOverState()
+    return this.gameStateManager.isGameOverState();
   }
 
   setGameOver(value: boolean) {
-    this.gameStateManager.setGameOver(value)
+    this.gameStateManager.setGameOver;
   }
 }

@@ -4,7 +4,7 @@ export const MAX_SONAR_RADIUS: number = 350;
 export const BACKGROUND_SCROLL_SPEED: number = 1;
 
 export const SECONDARY_SONAR_OFFSET: number = 20;
-export const COLLISION_PIXEL_THRESHOLD: number = 30;
+export const COLLISION_PIXEL_THRESHOLD: number = 10;
 export const DEPTH_SONAR: number = 70;
 export const DEPTH_TEXT: number = 100;
 export const PLAYER_SPEED: number = 200;
@@ -17,8 +17,8 @@ export const DEPTH_TORPEDO_LIGHT = 7;
 export const DEPTH_ENEMY = 5;
 
 export const COLORS = {
-  TORPEDO_SELECTED: '#FFFF00',
-  TORPEDO_DEFAULT: '#FFFFFF',
+  TORPEDO_SELECTED: "#FFFF00",
+  TORPEDO_DEFAULT: "#FFFFFF",
 };
 
 export const TORPEDO_POOL_SIZE = 5;
@@ -44,7 +44,7 @@ export const ASSETS = {
   JELLYFISH_SPRITESHEET: "jellyfish-upscale",
   TORPEDO_SOUND: "torpedo-sound",
   EXPLOSION_SPRITESHEET: "explosion",
-  SHOCK_SPRITESHEET: "shock"
+  SHOCK_SPRITESHEET: "shock",
 };
 
 export const ANIMATIONS = {

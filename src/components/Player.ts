@@ -26,7 +26,6 @@ export default class Player {
       .setDepth(C.DEPTH_PLAYER)
       .setPipeline("Light2D")
       .play(C.ANIMATIONS.SUB_IDLE)
-      .setScale(0.1)
       .setCollideWorldBounds(true);
 
     const body = this.sprite.body as Phaser.Physics.Arcade.Body;
