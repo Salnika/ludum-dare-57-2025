@@ -1,12 +1,13 @@
 import Phaser from "phaser";
 import * as C from "../config/constants";
+import GameScene from "../scenes/GameScene";
 
 export default class BubbleEmitter {
-  private scene: Phaser.Scene;
+  private scene: GameScene;
   private bubbleTextureKey: string = C.ASSETS.BUBBLE_PARTICLE_TEXTURE;
   private spawnTimer: Phaser.Time.TimerEvent | null = null;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: GameScene) {
     this.scene = scene;
   }
 

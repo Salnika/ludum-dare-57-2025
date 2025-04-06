@@ -45,15 +45,20 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
   }
 
   preUpdate(time: number, delta: number): void {
+    if (this.sceneRef.isPaused) {
+      this.setVelocity(0);
+    }
+    if (this.sceneRef.isPaused || this.isDying || !this.active) return;
     super.preUpdate(time, delta);
-
-    if (this.isDying || !this.active) return;
 
     this.timeAlive += delta;
 
-    const scrollAmount = C.BACKGROUND_SCROLL_SPEED * (delta / 16.66);
+    let scrollAmount = C.BACKGROUND_SCROLL_SPEED * (delta / 16.66);
+    if (this.sceneRef.isPaused) {
+      scrollAmount = 0;
+    }
+    // Si le jeu est en pause, on n’applique pas de scroll
     this.y -= scrollAmount;
-
     if (this.copy) {
       this.copy.x = this.x;
       this.copy.y = this.y;
@@ -102,7 +107,8 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
   }
 
   applySonarEffect(): void {
-    if (this.isDying || this.isGlowing || this.isStun) return;
+    if (this.isDying || this.isGlowing || this.isStun || this.sceneRef.isPaused)
+      return;
 
     this.isAffectedBySonar = true;
     this.play("jellyfish_swim");

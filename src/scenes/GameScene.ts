@@ -15,6 +15,7 @@ import JellyfishSpawnManager from "./JellyfishSpawnManager";
 import PipelineManager from "./PipelineManager";
 import Torpedo from "../components/Torpedo";
 import InputManager from "./InputManager";
+import * as C from '../config/constants'
 
 export default class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -31,14 +32,15 @@ export default class GameScene extends Phaser.Scene {
   private sonarEffectManager!: SonarEffectManager;
   private jellyfishSpawnManager!: JellyfishSpawnManager;
   private pipelineManager!: PipelineManager;
+  public isPaused: boolean = false;
 
   constructor() {
     super({ key: "GameScene" });
   }
 
   create() {
-    this.gameStateManager = new GameStateManager(this);
-    this.gameStateManager.resetGame();
+    this.uiManager = new UIManager(this);
+    this.gameStateManager = new GameStateManager(this, this.uiManager);
 
     this.pipelineManager = new PipelineManager(this);
     this.pipelineManager.registerAndConfigureOutlinePipeline();
@@ -50,7 +52,6 @@ export default class GameScene extends Phaser.Scene {
     this.player = new Player(this);
     this.backgroundManager = new BackgroundManager(this);
     this.torpedoManager = new TorpedoManager(this, this.backgroundManager);
-    this.uiManager = new UIManager(this);
     this.bubbleEmitter = new BubbleEmitter(this);
 
     this.torpedoManager.loadTorpedos([
@@ -125,9 +126,10 @@ export default class GameScene extends Phaser.Scene {
   }
 
   update(time: number, delta: number) {
-    if (this.gameStateManager.isGameOverState()) return;
+    if (this.isPaused || this.gameStateManager.isGameOverState()) return;
 
     const dt = delta / 1000;
+    const meters = C.BACKGROUND_SCROLL_SPEED * (delta / 16.66);
     const { targetX, targetY } = this.inputManager.getTargetCoordinates();
 
     this.gameStateManager.updateDepth(delta);
@@ -153,5 +155,14 @@ export default class GameScene extends Phaser.Scene {
 
   setGameOver(value: boolean) {
     this.gameStateManager.setGameOver;
+  }
+
+  togglePause() {
+    this.isPaused = !this.isPaused
+    if (this.isPaused) {
+      this.jellyfishSpawnManager.pauseSpawnTimer()
+    }else {
+      this.jellyfishSpawnManager.setupSpawnTimer()
+    }
   }
 }

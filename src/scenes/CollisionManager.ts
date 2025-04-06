@@ -8,10 +8,11 @@ import BubbleEmitter from "../effects/BubbleEmitter";
 import * as C from "../config/constants";
 import Torpedo from "../components/Torpedo";
 import { TorpedoType } from "../components/TorpedoTypes";
+import GameScene from "./GameScene";
 
 export default class CollisionManager {
   constructor(
-    private scene: Phaser.Scene,
+    private scene: GameScene,
     private player: Player,
     private torpedoManager: torpedoManager,
     private jellyfishGroup: Phaser.Physics.Arcade.Group,
@@ -49,7 +50,6 @@ export default class CollisionManager {
     jellyfishGameObject: Phaser.GameObjects.GameObject
   ): void {
     const jellyfish = jellyfishGameObject as Jellyfish;
-    console.log(jellyfish);
     if (this.scene.getIsGameOver() || jellyfish.isDying) {
       return;
     }
@@ -72,7 +72,6 @@ export default class CollisionManager {
     jellyfishGameObject: Phaser.GameObjects.GameObject
   ): void {
     const jellyfish = jellyfishGameObject as Jellyfish;
-    console.log(torpedoGameObject);
     const torpedo = torpedoGameObject.getData("torpedoInstance") as Torpedo;
 
     if (
@@ -95,6 +94,9 @@ export default class CollisionManager {
   }
 
   checkPlayerPixelCollision(): void {
+    if (this.player.isInvincible) {
+      return;
+    }
     const playerBounds = this.player.getSprite().getBounds();
     const checkPoints = [
       { x: playerBounds.centerX, y: playerBounds.centerY },
@@ -115,11 +117,22 @@ export default class CollisionManager {
 
   handlePlayerCollision(): void {
     if (this.scene.getIsGameOver()) return;
-
+    this.scene.cameras.main.shake(300, 0.01);
+    if (this.player.isInvincible) {
+      return;
+    }
+    if (this.player.hullLife > 1) {
+      this.player.handleCollision();
+      return;
+   
+    }
     this.scene.setGameOver(true);
     this.scene.physics.pause();
     this.player.handleCollision();
-    this.scene.cameras.main.shake(300, 0.01);
+    
+   
+   
+
     this.bubbleEmitter.stopSpawning();
     if (this.jellyfishSpawnTimer) this.jellyfishSpawnTimer.paused = true;
 
@@ -148,7 +161,6 @@ export default class CollisionManager {
       delay: 1500,
       callback: () => {
         if (this.scene.physics.world) this.scene.physics.resume();
-        this.scene.scene.restart();
       },
       loop: false,
     });

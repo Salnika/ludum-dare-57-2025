@@ -4,13 +4,14 @@ import Torpedo from "../components/TorpedoManager";
 import UIManager from "../ui/UIManager";
 import Sonar from "../components/Sonar";
 import GameStateManager from "./GameStateManager";
+import GameScene from "./GameScene";
 
 export default class InputManager {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private gamepad: Phaser.Input.Gamepad.Gamepad | undefined;
 
   constructor(
-    private scene: Phaser.Scene,
+    private scene: GameScene,
     private player: Player,
     private torpedoManager: Torpedo,
     private uiManager: UIManager,
@@ -23,6 +24,9 @@ export default class InputManager {
     if (this.scene.input.keyboard) {
       this.cursors = this.scene.input.keyboard.createCursorKeys();
       this.scene.input.keyboard.on("keydown-SPACE", this.triggerSonar, this);
+      this.scene.input.keyboard.on("keydown-ESC",() => {
+        this.scene.togglePause()
+      },  this);
     }
 
     this.setupGamepadInput();
@@ -170,6 +174,10 @@ export default class InputManager {
             0,
             true
           );
+        }
+
+        if (button.index === 9 && button.pressed) {
+          this.scene.togglePause();
         }
       },
       this

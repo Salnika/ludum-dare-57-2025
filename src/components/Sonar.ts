@@ -1,9 +1,10 @@
 import Phaser from "phaser";
 import OutlinePipeline from "../shaders/outline";
 import * as C from "../config/constants";
+import GameScene from "../scenes/GameScene";
 
 export default class Sonar {
-  private scene: Phaser.Scene;
+  private scene: GameScene;
   private graphics!: Phaser.GameObjects.Graphics;
   private sound!: Phaser.Sound.BaseSound;
   private outlinePipelineInstance!: OutlinePipeline | null;
@@ -12,7 +13,7 @@ export default class Sonar {
   private currentPosition: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
   private maxSonarRadius: number = C.MAX_SONAR_RADIUS;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: GameScene) {
     this.scene = scene;
   }
 

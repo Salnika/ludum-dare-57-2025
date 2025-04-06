@@ -1,12 +1,13 @@
 import Phaser from "phaser";
 import Player from "../components/Player";
 import * as C from "../config/constants";
+import GameScene from "./GameScene";
 
 export default class LightingManager {
   private submarineLight!: Phaser.GameObjects.PointLight;
   private coneLight!: Phaser.GameObjects.PointLight;
 
-  constructor(private scene: Phaser.Scene, private player: Player) {}
+  constructor(private scene: GameScene, private player: Player) {}
 
   setupLighting(): void {
     this.scene.lights.enable().setAmbientColor(0x101010);

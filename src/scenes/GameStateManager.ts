@@ -1,6 +1,6 @@
-import * as C from "../config/constants";
 import UIManager from "../ui/UIManager";
 import { TorpedoType } from "../components/TorpedoTypes";
+import GameScene from "./GameScene";
 
 export default class GameStateManager {
   private depth: number = 0;
@@ -11,9 +11,11 @@ export default class GameStateManager {
   private selectedTorpedoIndex: number = 0;
   private selectedTorpedoType!: TorpedoType;
   private uiManager: UIManager;
+  private scene: GameScene;
 
-  constructor(private scene: Phaser.Scene) {
-    this.uiManager = new UIManager(scene);
+  constructor(scene: GameScene, uiManager: UIManager) {
+    this.uiManager = uiManager;
+    this.scene = scene;
   }
 
   resetGame(): void {
@@ -23,6 +25,7 @@ export default class GameStateManager {
   }
 
   updateDepth(delta: number): void {
+    if (this.scene.isPaused) return;
     this.depth += 0.05 * (delta / 16.66);
     this.uiManager.updateDepthText(this.depth);
   }

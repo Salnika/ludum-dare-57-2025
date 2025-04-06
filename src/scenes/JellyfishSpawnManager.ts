@@ -1,11 +1,12 @@
 import Phaser from "phaser";
 import Jellyfish from "../components/Jellyfish";
+import GameScene from "./GameScene";
 
 export default class JellyfishSpawnManager {
   private jellyfishGroup!: Phaser.Physics.Arcade.Group;
   private jellyfishSpawnTimer!: Phaser.Time.TimerEvent;
 
-  constructor(private scene: Phaser.Scene, private depth: number) {
+  constructor(private scene: GameScene, private depth: number) {
     this.jellyfishGroup = this.scene.physics.add.group({
       classType: Jellyfish,
       runChildUpdate: true,
@@ -29,11 +30,15 @@ export default class JellyfishSpawnManager {
     });
   }
 
+  pauseSpawnTimer(): void {
+    this.jellyfishSpawnTimer.destroy()
+  }
+
   private trySpawnJellyfish(): void {
     if (this.scene.getIsGameOver()) return;
 
     let spawnChance = 1;
-    if (this.depth > 100) {
+    if (this.depth > 50) {
       spawnChance += Math.floor((this.depth - 100) / 5) * 0.02;
     }
     spawnChance = Math.min(1.0, spawnChance);

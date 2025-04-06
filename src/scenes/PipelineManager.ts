@@ -1,9 +1,10 @@
 import outlinePipelineInstanceBackground from "../shaders/outline";
+import GameScene from "./GameScene";
 
 export default class PipelineManager {
   private outlinePipelineInstanceBackground!: outlinePipelineInstanceBackground;
 
-  constructor(private scene: Phaser.Scene) {
+  constructor(private scene: GameScene) {
     this.outlinePipelineInstanceBackground =
       new outlinePipelineInstanceBackground(this.scene.game);
   }

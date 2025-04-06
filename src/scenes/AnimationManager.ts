@@ -1,7 +1,8 @@
 import * as C from "../config/constants";
+import GameScene from "./GameScene";
 
 export default class AnimationManager {
-  constructor(private scene: Phaser.Scene) {}
+  constructor(private scene: GameScene) {}
 
   createAnimations(): void {
     if (!this.scene.anims.exists("explosion")) {

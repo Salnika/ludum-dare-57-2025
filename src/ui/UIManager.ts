@@ -1,19 +1,21 @@
 import Phaser from "phaser";
 import * as C from "../config/constants";
 import { TorpedoType } from "../components/TorpedoTypes";
+import GameScene from "../scenes/GameScene";
 
 export default class UIManager {
-  private scene: Phaser.Scene;
+  private scene: GameScene;
   private depthText!: Phaser.GameObjects.Text;
   private torpedoInfoTexts: Map<TorpedoType, Phaser.GameObjects.Text> =
     new Map();
   private torpedoDisplayGroup!: Phaser.GameObjects.Group;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: GameScene) {
     this.scene = scene;
   }
 
   create(): void {
+    console.log('ICI')
     this.depthText = this.scene.add
       .text(this.scene.scale.width - 20, 20, "Profondeur: 0 m", {
         fontSize: "16px",

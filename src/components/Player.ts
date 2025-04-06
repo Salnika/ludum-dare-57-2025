@@ -1,11 +1,14 @@
 import Phaser from "phaser";
 import * as C from "../config/constants";
+import GameScene from "../scenes/GameScene";
 
 export default class Player {
-  private scene: Phaser.Scene;
+  private scene: GameScene;
   public sprite!: Phaser.Physics.Arcade.Sprite;
-
-  constructor(scene: Phaser.Scene) {
+  public hullLife: number = 2;
+  public isInvincible: boolean = false;
+  private originalPosition!: { x: number; y: number };
+  constructor(scene: GameScene) {
     this.scene = scene;
   }
 
@@ -21,6 +24,7 @@ export default class Player {
         repeat: -1,
       });
     }
+    this.originalPosition = { x, y };
     this.sprite = this.scene.physics.add
       .sprite(x, y, C.ASSETS.SUBMARINE_SPRITESHEET)
       .setDepth(C.DEPTH_PLAYER)
@@ -80,7 +84,6 @@ export default class Player {
       const gamepad = this.scene.input.gamepad?.getPad(gamepads[0].index);
       if (gamepad) {
         horizontalInput = gamepad.axes[0]?.getValue() || horizontalInput;
-
         verticalInput = gamepad.axes[1]?.getValue() || verticalInput;
 
         if (horizontalInput < 0) {
@@ -110,8 +113,25 @@ export default class Player {
   }
 
   handleCollision(): void {
-    if (!this.sprite?.active) return;
-    this.die();
+    if (!this.sprite?.active || this.isInvincible) return;
+
+    if (this.hullLife > 1) {
+      this.hullLife -= 1;
+      this.isInvincible = true;
+      this.sprite.x = this.originalPosition.x;
+      this.sprite.setAlpha(0.5);
+      this.scene.time.delayedCall(
+        5000,
+        () => {
+          this.isInvincible = false;
+          this.sprite.setAlpha(1);
+        },
+        [],
+        this
+      );
+    } else {
+      this.die();
+    }
   }
 
   die(): void {

@@ -2,13 +2,14 @@ import Phaser from "phaser";
 import { TorpedoType } from "./TorpedoTypes";
 import SingleTorpedo from "./Torpedo";
 import BackgroundManager from "./BackgroundManager";
+import GameScene from "../scenes/GameScene";
 
 export default class Torpedo {
   private torpedoGroup: Phaser.Physics.Arcade.Group;
-  private scene: Phaser.Scene;
+  private scene: GameScene;
   private backgroundManager: BackgroundManager;
 
-  constructor(scene: Phaser.Scene, backgroundManager: BackgroundManager) {
+  constructor(scene: GameScene, backgroundManager: BackgroundManager) {
     this.scene = scene;
     this.backgroundManager = backgroundManager;
     this.torpedoGroup = this.scene.physics.add.group({
@@ -77,8 +78,7 @@ export default class Torpedo {
         !torpedo.hasExploded
       ) {
         torpedo.update(time, delta);
-      }
-      if (torpedo.hasExploded) {
+      } else if (torpedo.hasExploded) {
         this.removeTorpedoFromPool(torpedo);
       }
     }, this);
@@ -98,7 +98,7 @@ export default class Torpedo {
   getRemainingTorpedos(): SingleTorpedo[] {
     const remainingTorpedos: SingleTorpedo[] = [];
     this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
-      const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
+      const torpedo = child?.data?.get("torpedoInstance") as SingleTorpedo;
       remainingTorpedos.push(torpedo);
     }, this);
     return remainingTorpedos;

@@ -8,7 +8,7 @@ export default class SingleTorpedo {
   public id: string;
   public sprite!: Phaser.Physics.Arcade.Sprite;
   public type: TorpedoType;
-  protected scene: Phaser.Scene;
+  protected scene: GameScene;
   private config: ITorpedoConfig;
   private isActiveState: boolean = false;
   private light!: Phaser.GameObjects.PointLight | null;
@@ -17,7 +17,7 @@ export default class SingleTorpedo {
   public hasExploded: boolean = false;
   public bodyIncrease: number = 1;
   constructor(
-    scene: Phaser.Scene,
+    scene: GameScene,
     type: TorpedoType,
     backgroundManager: BackgroundManager
   ) {
@@ -35,6 +35,8 @@ export default class SingleTorpedo {
     } else {
       this.sprite = this.scene.physics.add.sprite(0, 0, this.config.textureKey);
     }
+
+    this.sprite.setData("torpedoInstance", this);
 
     if (this.config?.scale) {
       this.sprite.setScale(this.config.scale);
@@ -129,6 +131,7 @@ export default class SingleTorpedo {
     const scrollAmount = C.BACKGROUND_SCROLL_SPEED * (delta / 16.66);
 
     if (this.light) {
+     
       if (!this.isActiveState) {
         this.light.y -= scrollAmount;
       } else {
@@ -146,14 +149,11 @@ export default class SingleTorpedo {
       this.sprite.body &&
       this.hasBeenFired
     ) {
-      console.log("ICI");
-      this.bodyIncrease += 1;
+      this.bodyIncrease += 10;
       const offsetX =
         (this.sprite.width + this.bodyIncrease) / 2 - this.bodyIncrease;
       const offsetY =
-        (this.sprite.height + this.bodyIncrease) / 2 -
-        this.bodyIncrease -
-        scrollAmount;
+        (this.sprite.height + this.bodyIncrease) / 2 - this.bodyIncrease - scrollAmount;
       this.sprite.body?.setCircle(this.bodyIncrease, offsetX, offsetY);
     }
 

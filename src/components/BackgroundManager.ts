@@ -1,15 +1,16 @@
 import Phaser from "phaser";
 import OutlinePipeline from "../shaders/outline";
 import * as C from "../config/constants";
+import GameScene from "../scenes/GameScene";
 
 export default class BackgroundManager {
-  private scene: Phaser.Scene;
+  private scene: GameScene;
   private background!: Phaser.GameObjects.TileSprite;
   private backgroundCopy!: Phaser.GameObjects.TileSprite | null;
   private outlinePipelineInstance!: OutlinePipeline | null;
   private sonarTimer: Phaser.Time.TimerEvent | null = null;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: GameScene) {
     this.scene = scene;
     this.backgroundCopy = null;
   }
