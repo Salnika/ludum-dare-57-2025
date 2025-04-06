@@ -36,6 +36,7 @@ export default class Torpedo {
 
   getTorpedo(type: TorpedoType): SingleTorpedo | null {
     let foundTorpedo: SingleTorpedo | null = null;
+    //@ts-expect-error
     this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
       const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
       if (
@@ -69,6 +70,7 @@ export default class Torpedo {
   }
 
   update(time: number, delta: number): void {
+    //@ts-expect-error
     this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
       const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
       if (
@@ -85,6 +87,7 @@ export default class Torpedo {
 
   getActiveTorpedoSprites(): Phaser.Physics.Arcade.Sprite[] {
     const activeSprites: Phaser.Physics.Arcade.Sprite[] = [];
+    //@ts-expect-error
     this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
       const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
       if (torpedo.isActive()) {
@@ -96,6 +99,7 @@ export default class Torpedo {
 
   getRemainingTorpedos(): SingleTorpedo[] {
     const remainingTorpedos: SingleTorpedo[] = [];
+    //@ts-expect-error
     this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
       const torpedo = child?.data?.get("torpedoInstance") as SingleTorpedo;
       remainingTorpedos.push(torpedo);
@@ -105,6 +109,7 @@ export default class Torpedo {
 
   getRemainingTorpedosNumeric(): Map<TorpedoType, number> {
     const torpedoCount = new Map<TorpedoType, number>();
+    //@ts-expect-error
     this.torpedoGroup.children.each((child: Phaser.GameObjects.GameObject) => {
       const torpedo = child.data.get("torpedoInstance") as SingleTorpedo;
       if (!torpedo.hasBeenFired) {

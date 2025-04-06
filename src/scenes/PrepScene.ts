@@ -16,6 +16,8 @@ interface SaveData {
 export default class PrepScene extends Phaser.Scene {
   private slots: number = 0; 
   private selectedTorpedoes: TorpedoType[] = [];
+  private selectedTorpedoesText!: Phaser.GameObjects.Text;
+  private selectedTorpedoesListText!: Phaser.GameObjects.Text;
   private torpedoButtons: { [key in TorpedoType]?: Phaser.GameObjects.Text } =
     {}; 
   private startButton?: Phaser.GameObjects.Text; 
@@ -154,9 +156,6 @@ export default class PrepScene extends Phaser.Scene {
     );
     this.updateStartButtonState(); 
   }
-
-  private selectedTorpedoesText: Phaser.GameObjects.Text;
-  private selectedTorpedoesListText: Phaser.GameObjects.Text;
 
   private startGame() {
     if (this.selectedTorpedoes.length === this.slots) {

@@ -15,6 +15,7 @@ export default class PipelineManager {
     const renderer = this.scene.game.renderer;
 
     if (renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer) {
+      //@ts-expect-error
       if (renderer.isContextLost) {
         console.error("WebGL context lost!");
         return;

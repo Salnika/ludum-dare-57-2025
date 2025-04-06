@@ -2,18 +2,20 @@ import Phaser from "phaser";
 
 export default class PauseScene extends Phaser.Scene {
   constructor() {
-    super('PauseScene');
+    super("PauseScene");
   }
 
   create() {
-    this.add.rectangle(
-      this.scale.width / 2,
-      this.scale.height / 2,
-      this.scale.width,
-      this.scale.height,
-      0x000000,
-      0.7
-    ).setOrigin(0.5);
+    this.add
+      .rectangle(
+        this.scale.width / 2,
+        this.scale.height / 2,
+        this.scale.width,
+        this.scale.height,
+        0x000000,
+        0.7
+      )
+      .setOrigin(0.5);
 
     this.add
       .text(this.scale.width / 2, this.scale.height * 0.3, "Paused", {
@@ -32,8 +34,12 @@ export default class PauseScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => this.resumeGame())
-      .on("pointerover", (item:Phaser.GameObjects.Text) => item.setColor("#ff0"))
-      .on("pointerout", (item:Phaser.GameObjects.Text) => item.setColor('#fff'))
+      .on("pointerover", (item: Phaser.GameObjects.Text) =>
+        item.setColor("#ff0")
+      )
+      .on("pointerout", (item: Phaser.GameObjects.Text) =>
+        item.setColor("#fff")
+      );
 
     this.add
       .text(this.scale.width / 2, this.scale.height * 0.6, "Restart", {
@@ -44,21 +50,26 @@ export default class PauseScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => this.restartGame())
-      .on("pointerover", (item:Phaser.GameObjects.Text) => item.setColor("#ff0"))
-      .on("pointerout", (item:Phaser.GameObjects.Text) => item.setColor('#fff'))
-
+      .on("pointerover", (item: Phaser.GameObjects.Text) =>
+        item.setColor("#ff0")
+      )
+      .on("pointerout", (item: Phaser.GameObjects.Text) =>
+        item.setColor("#fff")
+      );
 
     this.input.keyboard?.on("keydown-ESC", () => this.resumeGame());
   }
 
   resumeGame() {
-    this.scene.get('GameScene').resumeGame()
+    //@ts-expect-error
+    this.scene.get("GameScene").resumeGame();
     this.scene.stop();
   }
 
   restartGame() {
-    window.location.reload()
-    this.scene.get('GameScene').resumeGame()
+    window.location.reload();
+    //@ts-expect-error
+    this.scene.get("GameScene").resumeGame();
     this.scene.stop("GameScene");
     this.scene.start("LoadingScene");
     this.scene.stop();

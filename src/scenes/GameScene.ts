@@ -158,6 +158,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.isPaused || this.gameStateManager.isGameOverState()) return;
 
     const dt = delta / 1000;
+      //@ts-expect-error
     const { targetX, targetY } = this.inputManager.getTargetCoordinates();
 
     this.gameStateManager.updateDepth(delta);

@@ -11,6 +11,7 @@ export default class PostScene extends Phaser.Scene {
       '{"points":0,"hull":1,"slots":3,"torpedoes":{"light":true,"shock":false,"explosion":false}}'
     );
 
+    // @ts-expect-error
     save.points = parseInt(data.points)  + parseInt(save.points);
     localStorage.setItem("save", JSON.stringify(save));
     this.add.text(100, 100, `Points: ${save.points}`, {

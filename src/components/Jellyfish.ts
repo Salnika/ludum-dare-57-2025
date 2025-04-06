@@ -111,10 +111,12 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
 
     this.isAffectedBySonar = true;
     this.play("jellyfish_swim");
-
+    //@ts-expect-error
     if (this.sceneRef.player) {
       this.playerTarget = {
+        //@ts-expect-error
         x: this.sceneRef.player.getPosition().x,
+        //@ts-expect-error
         y: this.sceneRef.player.getPosition().y,
       };
     }
@@ -199,7 +201,7 @@ export default class Jellyfish extends Phaser.Physics.Arcade.Sprite {
 
   public die(): void {
     if (this.isDying) return;
-    
+
     this.isDying = true;
     if (this.body) this.body.enable = false;
 

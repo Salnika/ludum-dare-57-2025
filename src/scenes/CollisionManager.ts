@@ -28,6 +28,7 @@ export default class CollisionManager {
       this.scene.physics.add.overlap(
         torpedoGroup,
         this.jellyfishGroup,
+        // @ts-expect-error
         this.handleTorpedoJellyfishCollision,
         undefined,
         this
@@ -39,6 +40,7 @@ export default class CollisionManager {
     this.scene.physics.add.overlap(
       this.player.getSprite(),
       this.jellyfishGroup,
+      // @ts-expect-error
       this.handlePlayerJellyfishCollision,
       undefined,
       this
@@ -124,14 +126,10 @@ export default class CollisionManager {
     if (this.player.hullLife > 1) {
       this.player.handleCollision();
       return;
-   
     }
     this.scene.setGameOver(true);
     this.scene.physics.pause();
     this.player.handleCollision();
-    
-   
-   
 
     this.bubbleEmitter.stopSpawning();
     if (this.jellyfishSpawnTimer) this.jellyfishSpawnTimer.paused = true;
