@@ -194,7 +194,8 @@ export default class PostScene extends Phaser.Scene {
       }
 
       localStorage.setItem("save", JSON.stringify(this.saveData));
-      this.scene.restart({ points: 0 });
+      window.location.reload()
+      // this.scene.restart({ points: 0 });
     }
   }
 }
