@@ -99,7 +99,7 @@ export default class SingleTorpedo {
       100,
       0.5,
       0.05
-    );
+    ).setDepth(C.DEPTH_LIGHT);
     this.hasBeenFired = true;
   }
 
