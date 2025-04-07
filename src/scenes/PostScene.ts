@@ -91,7 +91,7 @@ export default class PostScene extends Phaser.Scene {
 
     replayButton.on("pointerdown", () => {
       this.scene.stop();
-      this.scene.start("LoadingScene");
+      window.location.reload()
     });
 
     replayButton.on("pointerover", () =>
