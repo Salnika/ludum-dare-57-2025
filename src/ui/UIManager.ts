@@ -128,13 +128,13 @@ export default class UIManager {
 
   updateDepthText(depth: number): void {
     if (this.depthText?.active) {
-      this.depthText.setText(`Profondeur: ${Math.floor(depth)} m`);
+      this.depthText.setText(`Depth: ${Math.floor(depth)} m`);
     }
   }
 
   updateHullLife(): void {
     if (this.hullLifeText?.active) {
-      this.hullLifeText.setText(`Coque: ${this.scene.player.hullLife}`);
+      this.hullLifeText.setText(`Hull: ${this.scene.player.hullLife}`);
     }
   }
 
