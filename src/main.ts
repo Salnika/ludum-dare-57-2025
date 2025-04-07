@@ -9,7 +9,7 @@ import PowerUpSelectionScene from "./scenes/PowerUpsSelectionScene";
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.WEBGL,
   width: 1080,
-  height: 1350,
+  height: 608,
   backgroundColor: "#000000",
   physics: {
     default: "arcade",
